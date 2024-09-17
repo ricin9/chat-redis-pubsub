@@ -14,7 +14,6 @@ func Setup() {
 	flag.Parse()
 
 	SetupDatabasesConfig()
-	SetupStores()
 
 	Validate = validator.New(validator.WithRequiredStructEnabled())
 }

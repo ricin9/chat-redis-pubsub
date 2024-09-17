@@ -2,9 +2,11 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"ricin9/fiber-chat/auth"
 	"ricin9/fiber-chat/config"
+	"ricin9/fiber-chat/middleware"
 	"ricin9/fiber-chat/views"
 	"strings"
 
@@ -16,30 +18,8 @@ import (
 
 func Setup(app *fiber.App) {
 
-	app.Get("/session", func(c *fiber.Ctx) error {
-		sess, err := config.SessionStore.Get(c)
-		if err != nil {
-			return c.JSON(fiber.Map{
-				"err": err,
-			})
-		}
-		log.Println("sess", sess.Get("username"))
-
-		sess.Set("username", "ricin9")
-
-		err = sess.Save()
-		if err != nil {
-			return c.JSON(fiber.Map{
-				"err": err,
-			})
-		}
-
-		return c.JSON(fiber.Map{
-			"cookies": c.Cookies("session_id"),
-		})
-
-	})
-	app.Get("/", func(c *fiber.Ctx) error {
+	app.Get("/", middleware.Authenticate, func(c *fiber.Ctx) error {
+		fmt.Println(c.Locals("uid"))
 		todos := []*views.Todo{}
 		index := views.Index(todos)
 		handler := adaptor.HTTPHandler(templ.Handler(index))
