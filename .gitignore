@@ -1,0 +1,6 @@
+tmp
+bin
+
+# sqlite
+*.db
+*.sqlite3

@@ -1,0 +1,88 @@
+package views
+
+import (
+    "fmt"
+    "ricin9/fiber-chat/views/components"
+)
+
+type Todo struct {
+    Id          string
+    Description string
+}
+
+templ Index(todos []*Todo) {
+    <!DOCTYPE html>
+    <html lang="en">
+        @components.Header()
+        <body>
+            <main class="min-h-screen w-full">
+                <nav class="flex w-full border border-b-zinc-200 px-4 py-4">
+                    <h3 class="text-base lg:text-lg font-medium text-center">
+                        GO Fullstack app
+                    </h3>
+                </nav>
+                <div class="mt-6 w-full flex justify-center items-center flex-col">
+                    // FORM PROCESSING
+                    <form
+                        hx-post="/"
+                        hx-trigger="submit"
+                        hx-swap="none"
+                        onsubmit="reloadPage()"
+                        class="w-96"
+                    >
+                        <textarea
+                            name="description"
+                            cols="30"
+                            rows="2"
+                            class="w-full border rounded-lg mb-2 p-4"
+                            placeholder="Input todo details"
+                            required
+                        ></textarea>
+                        <button
+                            class="py-1 px-4 w-full h-10 rounded-lg text-white bg-zinc-800"
+                        >
+                            Create
+                        </button>
+                    </form>
+                    <section class="border-t border-t-zinc-200 mt-6 px-2 py-4 w-96">
+                        // LOOP THROUGH THE TODOS
+                        <ul id="todo-list">
+                            for _, todo := range todos {
+                                <li class="ml-4 ml-4 border p-2 rounded-lg mb-2" id={ fmt.Sprintf("%s", todo.Id) }>
+                                    <p class="font-medium text-sm">Todo item { todo.Id }</p>
+                                    <p class="text-sm text-zinc-500 mb-2">
+                                        { todo.Description }
+                                    </p>
+                                    <div class="flex gap-4 items-center mt-2">
+                                        <a
+                                            href="#"
+                                            class="flex items-center border py-1 px-2 rounded-lg"
+                                        >
+                                            <p class="text-sm">Edit</p>
+                                        </a>
+                                        <button
+                                            hx-delete={ fmt.Sprintf("/%s", todo.Id) }
+                                            hx-swap="delete"
+                                            hx-target={ fmt.Sprintf("#%s", todo.Id) }
+                                            class="flex items-center border py-1 px-2 rounded-lg hover:bg-red-300"
+                                        >
+                                            <p class="text-sm">Delete</p>
+                                        </button>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </section>
+                </div>
+            </main>
+        </body>
+        @components.Footer()
+    </html>
+    <script>
+        function reloadPage() {
+                setTimeout(function() {
+            window.location.reload();
+        }, 2000);
+        }
+    </script>
+}
