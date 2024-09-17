@@ -2,7 +2,6 @@ package config
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	"github.com/redis/go-redis/v9"
@@ -32,13 +31,6 @@ func SetupSqlite() {
 	}
 
 	Db = db
-	data, err := db.Query("select 1")
-	if err != nil {
-		fmt.Println("sqlite3 query .tables error", err)
-	}
-
-	fmt.Println("data: ", data)
-
 }
 
 func SetupRedis() {

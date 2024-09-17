@@ -3,9 +3,11 @@ package auth
 import (
 	"fmt"
 	"ricin9/fiber-chat/config"
+	"ricin9/fiber-chat/utils"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mattn/go-sqlite3"
 )
 
 type (
@@ -30,17 +32,31 @@ func Signup(c *fiber.Ctx) error {
 		return c.Format(msg)
 	}
 
+	hash, err := utils.HashPassword(user.Password)
+	if err != nil {
+		return c.Format("Error hashing password")
+	}
+
 	db := config.Db
 
-	res, err := db.Exec("INSERT INTO users (username, password) VALUES (?, ?)", user.Username, user.Password)
+	res, err := db.Exec("INSERT INTO users (username, password) VALUES (?, ?)", user.Username, hash)
 	if err != nil {
+		if e, ok := err.(sqlite3.Error); ok && e.Code == sqlite3.ErrConstraint {
+			return c.Format("Username already exists")
+		}
 		return c.Format("Error inserting user")
 	}
 
-	userId, err := res.LastInsertId()
+	uid, err := res.LastInsertId()
 	if err != nil {
 		return c.Format("Error getting last insert id")
 	}
 
-	return c.Format("aight, user valid, user id : " + strconv.FormatInt(userId, 10))
+	err = utils.CreateSession(c, uid)
+	if err != nil {
+		return c.Format("User created but couldn't create a session")
+	}
+
+	fmt.Println("the created cookie: ", string(c.Response().Header.PeekCookie("session")))
+	return c.Format("aight, user valid, user id : " + strconv.FormatInt(uid, 10))
 }
