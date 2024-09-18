@@ -9,6 +9,7 @@
           href="#"
           hx-get="/room/{{.ID}}"
           hx-target="#messages"
+          hx-push-url="true"
           class="text-blue-600 hover:underline"
           >{{.Name}}</a
         >
@@ -18,17 +19,34 @@
   </div>
 
   <!-- Messages -->
-  <div class="w-3/4 ml-4 bg-white rounded shadow p-4">
-    <div id="messages" class="h-96 overflow-y-auto mb-4">
-      <!-- Messages will be loaded here -->
+  <div
+    hx-ext="ws"
+    ws-connect="/api/v1/ws"
+    class="h-96 w-3/4 ml-4 flex flex-col bg-white rounded shadow p-4"
+  >
+    <div id="messages" class="overflow-y-auto mb-4 flex-grow">
+      {{template "partials/messages" .}}
     </div>
-    <form hx-post="/send-message" hx-target="#messages" hx-swap="beforeend">
+    <form ws-send hx-vals='{"room_id":1}' class="flex flex-row gap-2">
       <input
         type="text"
-        name="message"
+        name="Content"
         class="w-full p-2 border rounded"
         placeholder="Type your message..."
       />
+      <button
+        type="submit"
+        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold p-2 px-4 rounded shadow"
+      >
+        Send
+      </button>
     </form>
   </div>
 </div>
+
+<script>
+  const messages = document.getElementById("messages");
+  document.addEventListener("htmx:wsAfterMessage", function (event) {
+    messages.scrollTo(0, messages.scrollHeight);
+  });
+</script>

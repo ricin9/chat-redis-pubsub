@@ -33,3 +33,25 @@ func CreateSession(c *fiber.Ctx, uid int64) error {
 
 	return nil
 }
+
+func DestroySession(c *fiber.Ctx) error {
+	sid := c.Cookies("session")
+
+	db := config.Db
+	_, err := db.Exec("DELETE FROM sessions WHERE session_id = ?", sid)
+	if err != nil {
+		return err
+	}
+
+	cookie := new(fiber.Cookie)
+	cookie.Name = "session"
+	cookie.Value = ""
+	cookie.Expires = time.Now().Add(-time.Hour)
+	cookie.Secure = *config.Prod
+	cookie.HTTPOnly = true
+	cookie.SameSite = "Strict"
+
+	c.Cookie(cookie)
+
+	return nil
+}

@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"context"
-	"log"
+	"fmt"
 	"ricin9/fiber-chat/auth"
 	"ricin9/fiber-chat/config"
+	"ricin9/fiber-chat/handlers"
 	"ricin9/fiber-chat/middleware"
-	"strings"
+	"time"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
@@ -15,7 +15,82 @@ import (
 func Setup(app *fiber.App) {
 
 	app.Get("/", middleware.Authenticate, func(c *fiber.Ctx) error {
-		return c.Render("pages/index", fiber.Map{}, "layouts/base")
+		uid := c.Locals("uid").(int64)
+
+		db := config.Db
+
+		rows, err := db.Query("SELECT r.room_id, r.name FROM rooms r JOIN room_users ru ON r.room_id = ru.room_id WHERE ru.user_id = ?", uid)
+		if err != nil {
+			fmt.Println("[/ Rooms] err: ", err)
+			return c.Format("error fetching chat rooms")
+		}
+		defer rows.Close()
+
+		type Room struct {
+			ID   int
+			Name string
+		}
+		var rooms []Room
+		for rows.Next() {
+			var room Room
+			err := rows.Scan(&room.ID, &room.Name)
+			if err != nil {
+				return c.Format("error scanning chat rooms")
+			}
+
+			rooms = append(rooms, room)
+		}
+
+		return c.Render("pages/index", fiber.Map{"Rooms": rooms}, "layouts/base")
+	})
+
+	app.Get("/room/:id", middleware.Authenticate, func(c *fiber.Ctx) error {
+		uid := c.Locals("uid").(int64)
+		roomID, err := c.ParamsInt("id")
+		if err != nil {
+			return c.SendStatus(fiber.StatusBadRequest)
+		}
+
+		db := config.Db
+
+		err = db.QueryRow("select 1 from room_users where room_id = ? and user_id = ?", roomID, uid).Err()
+		if err != nil {
+			return c.Format("you are not a member of this room")
+		}
+
+		rows, err := db.Query("SELECT m.message_id, m.content, m.created_at, u.user_id, u.username FROM messages m JOIN users u ON m.user_id = u.user_id WHERE m.room_id = ? ORDER BY m.message_id DESC", roomID)
+		if err != nil {
+			return c.Format("error fetching messages")
+		}
+
+		type Message struct {
+			ID        int
+			Content   string
+			CreatedAt time.Time
+			UserID    int
+			Username  string
+		}
+
+		var messages []Message
+		for rows.Next() {
+			var message Message
+			err := rows.Scan(&message.ID, &message.Content, &message.CreatedAt, &message.UserID, &message.Username)
+			if err != nil {
+				return c.Format("error scanning messages")
+			}
+
+			messages = append(messages, message)
+		}
+
+		fmt.Println("uid", uid)
+		fmt.Println("room_id", roomID)
+		fmt.Println("messages", messages)
+
+		if c.Get("HX-Request") != "" {
+			return c.Render("partials/messages", fiber.Map{"Messages": messages})
+		}
+
+		return c.Render("pages/index", fiber.Map{"Messages": messages}, "layouts/base")
 	})
 
 	app.Get("/login", func(c *fiber.Ctx) error {
@@ -28,15 +103,13 @@ func Setup(app *fiber.App) {
 	})
 	app.Post("/signup", auth.Signup)
 
-	app.Post("/signup", auth.Signup)
+	app.Get("/logout", auth.Logout)
 	// Create a /api/v1 endpoint
 	v1 := app.Group("/api/v1")
 
 	// websockets
 
-	rdb := config.RedisClient
-
-	v1.Use("/ws", func(c *fiber.Ctx) error {
+	v1.Use("/ws", middleware.Authenticate, func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("allowed", true)
 			return c.Next()
@@ -44,50 +117,6 @@ func Setup(app *fiber.App) {
 		return fiber.ErrUpgradeRequired
 	})
 
-	v1.Get("/ws", websocket.New(func(c *websocket.Conn) {
-		var (
-			mt  int
-			msg []byte
-			err error
-		)
+	v1.Get("/ws", websocket.New(handlers.Websocket))
 
-		chatQuery := c.Query("chats")
-		chats := strings.Split(chatQuery, ",")
-
-		pubsub := rdb.Subscribe(context.Background(), chats...)
-		ch := pubsub.Channel()
-		defer pubsub.Close()
-
-		go func() {
-			for msg := range ch {
-				if err := c.WriteMessage(1, []byte(msg.Channel+": "+msg.Payload)); err != nil {
-					log.Fatalln("write error: ", err)
-				}
-			}
-		}()
-
-		for {
-			if mt, msg, err = c.ReadMessage(); err != nil {
-				log.Println("read:", err)
-				break
-			}
-			log.Printf("recv: %s", msg)
-
-			parts := strings.Split(string(msg), ":")
-			log.Println("parts", parts)
-			if len(parts) != 2 {
-				log.Println("invalid message")
-				continue
-			}
-			chat := parts[0]
-			msg := parts[1]
-
-			if err := rdb.Publish(context.Background(), chat, msg).Err(); err != nil {
-				log.Println("publish:", err)
-				break
-			}
-			_ = mt
-		}
-
-	}))
 }

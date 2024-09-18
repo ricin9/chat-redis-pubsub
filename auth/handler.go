@@ -49,6 +49,14 @@ func Signup(c *fiber.Ctx) error {
 		return c.Format("Error getting last insert id")
 	}
 
+	// add to general chat
+	// TODO: add and fix trigger migration, it errors now with sql-migrate
+	go func() {
+		_, err := db.Exec("INSERT INTO room_users (room_id, user_id) VALUES (?, ?)", 1, uid)
+		if err != nil {
+			return
+		}
+	}()
 	err = utils.CreateSession(c, uid)
 	if err != nil {
 		return c.Format("User created but couldn't create a session")
@@ -91,5 +99,15 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	c.Set("HX-Location", "/")
-	return c.SendStatus(201)
+	return c.SendStatus(200)
+}
+
+func Logout(c *fiber.Ctx) error {
+	err := utils.DestroySession(c)
+	if err != nil {
+		return c.Format("Error destroying session")
+	}
+
+	c.Set("HX-Redirect", "/login")
+	return c.SendStatus(200)
 }
