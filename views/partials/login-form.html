@@ -1,0 +1,38 @@
+<form hx-post="/login">
+  <p id="message" class="text-yellow-500 text-sm mt-1">{{.Message}}</p>
+  <div class="mb-4">
+    <label for="username" class="block mb-2">Username</label>
+    <input
+      type="text"
+      id="username"
+      name="username"
+      class="w-full p-2 border rounded"
+      required
+      value="{{.User.Username}}"
+      oninput="this.nextElementSibling.textContent = ''"
+    />
+    <p id="username-error" class="text-red-500 text-sm mt-1">
+      {{.Errors.Username}}
+    </p>
+  </div>
+  <div class="mb-4">
+    <label for="password" class="block mb-2">Password</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      class="w-full p-2 border rounded"
+      required
+      oninput="this.nextElementSibling.textContent = ''"
+    />
+    <p id="password-error" class="text-red-500 text-sm mt-1">
+      {{.Errors.Password}}
+    </p>
+  </div>
+  <button
+    type="submit"
+    class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+  >
+    Login
+  </button>
+</form>

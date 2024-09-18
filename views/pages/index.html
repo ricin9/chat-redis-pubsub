@@ -1,0 +1,34 @@
+<div class="flex">
+  <!-- Rooms list -->
+  <div class="w-1/4 bg-white rounded shadow p-4">
+    <h2 class="text-xl font-bold mb-4">Rooms</h2>
+    <ul id="room-list">
+      {{range .Rooms}}
+      <li class="mb-2">
+        <a
+          href="#"
+          hx-get="/room/{{.ID}}"
+          hx-target="#messages"
+          class="text-blue-600 hover:underline"
+          >{{.Name}}</a
+        >
+      </li>
+      {{end}}
+    </ul>
+  </div>
+
+  <!-- Messages -->
+  <div class="w-3/4 ml-4 bg-white rounded shadow p-4">
+    <div id="messages" class="h-96 overflow-y-auto mb-4">
+      <!-- Messages will be loaded here -->
+    </div>
+    <form hx-post="/send-message" hx-target="#messages" hx-swap="beforeend">
+      <input
+        type="text"
+        name="message"
+        class="w-full p-2 border rounded"
+        placeholder="Type your message..."
+      />
+    </form>
+  </div>
+</div>
