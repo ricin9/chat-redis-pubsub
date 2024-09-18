@@ -2,29 +2,31 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"ricin9/fiber-chat/auth"
 	"ricin9/fiber-chat/config"
 	"ricin9/fiber-chat/middleware"
-	"ricin9/fiber-chat/views"
 	"strings"
 
-	"github.com/a-h/templ"
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
 )
 
 func Setup(app *fiber.App) {
 
 	app.Get("/", middleware.Authenticate, func(c *fiber.Ctx) error {
-		fmt.Println(c.Locals("uid"))
-		todos := []*views.Todo{}
-		index := views.Index(todos)
-		handler := adaptor.HTTPHandler(templ.Handler(index))
-		return handler(c)
+		return c.Render("pages/index", fiber.Map{}, "layouts/base")
 	})
+
+	app.Get("/login", func(c *fiber.Ctx) error {
+		return c.Render("pages/login", fiber.Map{"Guest": true}, "layouts/base")
+	})
+	app.Post("/login", auth.Login)
+
+	app.Get("/signup", func(c *fiber.Ctx) error {
+		return c.Render("pages/signup", fiber.Map{"Guest": true}, "layouts/base")
+	})
+	app.Post("/signup", auth.Signup)
 
 	app.Post("/signup", auth.Signup)
 	// Create a /api/v1 endpoint

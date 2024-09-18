@@ -1,10 +1,8 @@
 package auth
 
 import (
-	"fmt"
 	"ricin9/fiber-chat/config"
 	"ricin9/fiber-chat/utils"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mattn/go-sqlite3"
@@ -27,9 +25,8 @@ func Signup(c *fiber.Ctx) error {
 
 	err := validate.Struct(user)
 	if err != nil {
-		// todo, function to format error
-		msg := fmt.Sprintf("Validation error: %s", err.Error())
-		return c.Format(msg)
+		errors := utils.FormatErrors(err)
+		return c.Render("partials/signup-form", fiber.Map{"Errors": errors, "User": user})
 	}
 
 	hash, err := utils.HashPassword(user.Password)
@@ -57,6 +54,42 @@ func Signup(c *fiber.Ctx) error {
 		return c.Format("User created but couldn't create a session")
 	}
 
-	fmt.Println("the created cookie: ", string(c.Response().Header.PeekCookie("session")))
-	return c.Format("aight, user valid, user id : " + strconv.FormatInt(uid, 10))
+	c.Set("HX-Location", "/")
+	return c.SendStatus(201)
+}
+
+func Login(c *fiber.Ctx) error {
+	validate := config.Validate
+
+	user := &User{
+		Username: c.FormValue("username"),
+		Password: c.FormValue("password"),
+	}
+
+	err := validate.Struct(user)
+	if err != nil {
+		errors := utils.FormatErrors(err)
+		return c.Render("partials/signup-form", fiber.Map{"Errors": errors, "User": user})
+	}
+
+	db := config.Db
+	var uid int64
+	var hash string
+	err = db.QueryRow("SELECT user_id, password FROM users WHERE username = ?", user.Username).Scan(&uid, &hash)
+	if err != nil {
+		return c.Render("partials/login-form", fiber.Map{"Message": "Invalid username or password", "User": user})
+	}
+
+	same, err := utils.ComparePassword(hash, user.Password)
+	if err != nil || !same {
+		return c.Render("partials/login-form", fiber.Map{"Message": "Invalid username or password", "User": user})
+	}
+
+	err = utils.CreateSession(c, uid)
+	if err != nil {
+		return c.Format("User created but couldn't create a session")
+	}
+
+	c.Set("HX-Location", "/")
+	return c.SendStatus(201)
 }
