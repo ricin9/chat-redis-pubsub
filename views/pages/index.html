@@ -23,14 +23,32 @@
     id="room-messages"
     class="w-3/4 ml-4 flex flex-col bg-white rounded shadow p-4"
   >
-    {{ template "partials/right-side-no-room" . }}
+    <h3 id="messages" class="text-2xl">
+      Welcome, Select a chat room on the left to view its messages.
+    </h3>
   </div>
 </div>
 
-<!-- <script>
-  document.addEventListener("htmx:wsAfterMessage", function (event) {
-    console.log("scrolling down", messages)
-    const messages = document.getElementById("room-messages");
-    messages.scrollTo(0, messages.scrollHeight);
+<script>
+  document.addEventListener("htmx:afterSettle", function (event) {
+    const messages = document.getElementById("messages");
+    if (messages) {
+      messages.scrollTo(0, messages.scrollHeight);
+    }
   });
-</script> -->
+
+  document.addEventListener("htmx:wsAfterMessage", function (event) {
+    const messages = document.getElementById("messages");
+    if (messages) {
+      // Check if user is near the bottom
+      const isAtBottom =
+        messages.scrollHeight - messages.scrollTop <=
+        messages.clientHeight + 50;
+
+      if (isAtBottom) {
+        messages.scrollTo(0, messages.scrollHeight);
+      }
+      // TODO, show notification if user is not at the bottom
+    }
+  });
+</script>

@@ -2,9 +2,15 @@
   {{range .Messages}} {{template "partials/message" .}} {{end}}
 </div>
 
-<form ws-send hx-vals='{"room_id":{{.RoomID}}}' class="flex flex-row gap-2">
+<form
+  ws-send
+  hx-vals='{"room_id":{{.RoomID}}}'
+  class="flex flex-row gap-2"
+  hx-on::ws-after-send="this.reset();"
+>
   <input
     type="text"
+    id="message-input"
     name="Content"
     class="w-full p-2 border rounded"
     placeholder="Type your message..."

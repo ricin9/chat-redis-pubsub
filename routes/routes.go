@@ -17,9 +17,6 @@ func Setup(app *fiber.App) {
 	app.Get("/", middleware.Authenticate, func(c *fiber.Ctx) error {
 		uid := c.Locals("uid").(int64)
 
-		// if c.Get("HX-Request") != "" {
-		// 	return c.Render("partials/right-side-no-room", nil)
-		// }
 		db := config.Db
 
 		rows, err := db.Query("SELECT r.room_id, r.name FROM rooms r JOIN room_users ru ON r.room_id = ru.room_id WHERE ru.user_id = ?", uid)

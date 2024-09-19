@@ -80,10 +80,10 @@
     />
   </head>
   <body class="bg-gray-100 h-screen flex flex-col">
-    <nav class="bg-blue-600 p-4 text-white" hx-boost="true">
+    <nav class="bg-blue-600 p-4 text-white">
       <div class="container mx-auto flex justify-between items-center">
         <a href="/" class="text-xl font-bold">Chat App</a>
-        <div>
+        <div hx-boost="true">
           {{if .Guest}}
           <a href="/login" class="hover:underline mr-4">Login</a>
           <a href="/signup" class="hover:underline">Sign Up</a>
