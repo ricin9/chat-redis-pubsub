@@ -1,3 +1,18 @@
-{{range .Messages}}
-<div class="mb-2"><strong>{{.Username}}</strong>: {{.Text}}</div>
-{{end}}
+<div id="messages" class="overflow-y-auto mb-4 flex-grow">
+  {{range .Messages}} {{template "partials/message" .}} {{end}}
+</div>
+
+<form ws-send hx-vals='{"room_id":{{.RoomID}}}' class="flex flex-row gap-2">
+  <input
+    type="text"
+    name="Content"
+    class="w-full p-2 border rounded"
+    placeholder="Type your message..."
+  />
+  <button
+    type="submit"
+    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold p-2 px-4 rounded shadow"
+  >
+    Send
+  </button>
+</form>

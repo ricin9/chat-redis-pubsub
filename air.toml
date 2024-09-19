@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
 args_bin = []
 bin = "./tmp/main"
-cmd = "go build -o ./tmp/main ."
+cmd = "npx tailwindcss -c ./views/tailwind.config.js -i ./views/input.css -o ./static/css/output.css --watch && go build -o ./tmp/main ."
 delay = 1000
 exclude_dir = ["assets", "tmp", "vendor", "testdata"]
 exclude_file = []

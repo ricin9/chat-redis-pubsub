@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"ricin9/fiber-chat/config"
 	"strconv"
@@ -82,9 +84,31 @@ func handleIncoming(c *websocket.Conn, uid int64) {
 
 func handeleSubscription(c *websocket.Conn, ch <-chan *redis.Message) {
 	for msg := range ch {
-		markup := `<div id="messages" hx-swap-oob="beforeend"><p>hello</p></div>`
-		_ = msg
-		if err := c.WriteMessage(1, []byte(markup)); err != nil {
+		var payload PublishMessagePayload
+		err := json.Unmarshal([]byte(msg.Payload), &payload)
+		if err != nil {
+			fmt.Println("error unmarshalling subscribed message", err)
+			continue
+		}
+
+		tmpl, err := template.ParseFiles("views/partials/message.html")
+		if err != nil {
+			fmt.Println("could not find template file", err)
+			break
+		}
+
+		var output bytes.Buffer
+		err = tmpl.Execute(&output, payload)
+		if err != nil {
+			fmt.Println("error executing template", err)
+			break
+		}
+
+		result := output.String()
+
+		result = `<div id="messages" hx-swap-oob="beforeend">` + result + `</div>`
+
+		if err := c.WriteMessage(1, []byte(result)); err != nil {
 			log.Fatalln("write error: ", err)
 		}
 	}

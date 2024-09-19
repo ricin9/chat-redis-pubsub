@@ -1,18 +1,18 @@
-<div class="flex">
+<div class="flex h-[calc(100vh-8rem)]">
   <!-- Rooms list -->
   <div class="w-1/4 bg-white rounded shadow p-4">
     <h2 class="text-xl font-bold mb-4">Rooms</h2>
     <ul id="room-list">
       {{range .Rooms}}
       <li class="mb-2">
-        <a
-          href="#"
-          hx-get="/room/{{.ID}}"
-          hx-target="#messages"
+        <button
+          hx-get="/rooms/{{.ID}}"
+          hx-target="#room-messages"
           hx-push-url="true"
           class="text-blue-600 hover:underline"
-          >{{.Name}}</a
         >
+          {{.Name}}
+        </button>
       </li>
       {{end}}
     </ul>
@@ -20,33 +20,17 @@
 
   <!-- Messages -->
   <div
-    hx-ext="ws"
-    ws-connect="/api/v1/ws"
-    class="h-96 w-3/4 ml-4 flex flex-col bg-white rounded shadow p-4"
+    id="room-messages"
+    class="w-3/4 ml-4 flex flex-col bg-white rounded shadow p-4"
   >
-    <div id="messages" class="overflow-y-auto mb-4 flex-grow">
-      {{template "partials/messages" .}}
-    </div>
-    <form ws-send hx-vals='{"room_id":1}' class="flex flex-row gap-2">
-      <input
-        type="text"
-        name="Content"
-        class="w-full p-2 border rounded"
-        placeholder="Type your message..."
-      />
-      <button
-        type="submit"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold p-2 px-4 rounded shadow"
-      >
-        Send
-      </button>
-    </form>
+    {{ template "partials/right-side-no-room" . }}
   </div>
 </div>
 
-<script>
-  const messages = document.getElementById("messages");
+<!-- <script>
   document.addEventListener("htmx:wsAfterMessage", function (event) {
+    console.log("scrolling down", messages)
+    const messages = document.getElementById("room-messages");
     messages.scrollTo(0, messages.scrollHeight);
   });
-</script>
+</script> -->
