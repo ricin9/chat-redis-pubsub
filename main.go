@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"ricin9/fiber-chat/config"
-	"ricin9/fiber-chat/routes"
+	"ricin9/fiber-chat/handlers"
 
 	"log"
 
@@ -34,7 +34,7 @@ func main() {
 	app.Use(logger.New())
 
 	// Routes
-	routes.Setup(app)
+	handlers.Setup(app)
 
 	// Listen on port 3000
 	log.Fatal(app.Listen(*config.Port)) // go run app.go -port=:3000
