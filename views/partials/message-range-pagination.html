@@ -9,7 +9,7 @@
   class="mb-2"
   id="last-message"
   hx-get="/rooms/{{$.RoomID}}/messages?page={{or $.NextPage 2}}"
-  hx-trigger="intersect once"
+  hx-trigger="intersect threshold:0.1 once root:#room-{{$.RoomID}}-messages"
   hx-swap="beforebegin"
 >
   <strong>{{.Username}}</strong>: {{.Content}}
