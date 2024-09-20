@@ -3,7 +3,13 @@
   <div class="w-1/4 bg-white rounded shadow p-4 flex flex-col h-full">
     <h2 class="text-xl font-bold mb-4">Rooms</h2>
     <ul id="room-list" class="overflow-y-auto flex-grow">
-      {{range .Rooms}} {{template "partials/room" .}} {{end}}
+      {{range .Rooms}} {{template "partials/room" .}} {{end}} {{if .RoomID}}
+      <script>
+        document
+          .getElementById("room-{{.RoomID}}")
+          .classList.add("selected-room");
+      </script>
+      {{end}}
     </ul>
   </div>
 

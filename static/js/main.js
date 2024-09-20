@@ -18,7 +18,6 @@ document.addEventListener("htmx:wsBeforeMessage", function (event) {
 
   if (currentRoomId !== IncomingMessageRoomId) {
     console.log("Message from another room, not swapping", event.detail);
-    //event.detail.shouldSwap = false;
   }
 });
 
@@ -27,13 +26,8 @@ document.addEventListener("htmx:wsAfterMessage", function (event) {
     return;
   }
 
-  const currentRoom = document.querySelector(".selected-room");
-  const currentRoomId = currentRoom
-    ? currentRoom.id.replace("room-", "")
-    : null;
-
-  if (!currentRoomId) {
-    // show notification actually
+  const currentRoomId = location.pathname.split("/").pop();
+  if (!currentRoomId || Number.isNaN(Number(currentRoomId))) {
     return;
   }
 
@@ -47,9 +41,8 @@ document.addEventListener("htmx:wsAfterMessage", function (event) {
   }
 
   // scroll messages to bottom
-  const messages = document.querySelector(`room-${currentRoomId}-messages`);
+  const messages = document.getElementById(`room-${currentRoomId}-messages`);
   if (!messages) {
-    console.log("not found messaages element");
     return;
   }
   // Check if user is near the bottom
