@@ -16,9 +16,9 @@ import (
 )
 
 type PublishMessagePayload struct {
-	ID        int64     `json:"id"`
-	UserID    int64     `json:"user_id"`
-	RoomID    int64     `json:"room_id"`
+	ID        int       `json:"id"`
+	UserID    int       `json:"user_id"`
+	RoomID    int       `json:"room_id"`
 	Username  string    `json:"username"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
@@ -26,7 +26,7 @@ type PublishMessagePayload struct {
 
 type IncomingMessage struct {
 	Content string `json:"content"`
-	RoomID  int64  `json:"room_id"`
+	RoomID  int    `json:"room_id"`
 }
 
 type RoomChangePayload struct {
@@ -41,7 +41,7 @@ var (
 )
 
 func Websocket(c *websocket.Conn) {
-	uid := c.Locals("uid").(int64)
+	uid := c.Locals("uid").(int)
 	rooms := userRooms(uid)
 
 	writeMu := sync.Mutex{}
@@ -53,7 +53,7 @@ func Websocket(c *websocket.Conn) {
 
 }
 
-func handleRoomChanges(c *websocket.Conn, uid int64, writeMu *sync.Mutex, done chan struct{}) {
+func handleRoomChanges(c *websocket.Conn, uid int, writeMu *sync.Mutex, done chan struct{}) {
 	defer c.Close()
 
 	rdb := config.RedisClient
@@ -152,7 +152,7 @@ func handeleSubscription(c *websocket.Conn, rooms []string, writeMu *sync.Mutex,
 	}
 }
 
-func handleIncoming(c *websocket.Conn, uid int64, done chan struct{}) {
+func handleIncoming(c *websocket.Conn, uid int, done chan struct{}) {
 	defer c.Close()
 	defer close(done)
 
@@ -191,11 +191,11 @@ func handleIncoming(c *websocket.Conn, uid int64, done chan struct{}) {
 		}
 
 		rdb := config.RedisClient
-		rdb.Publish(context.Background(), strconv.FormatInt(msg.RoomID, 10), payload)
+		rdb.Publish(context.Background(), strconv.Itoa(msg.RoomID), payload)
 	}
 }
 
-func getUsername(uid int64) string {
+func getUsername(uid int) string {
 	db := config.Db
 
 	var username string
@@ -207,7 +207,7 @@ func getUsername(uid int64) string {
 
 	return username
 }
-func userRooms(uid int64) []string {
+func userRooms(uid int) []string {
 	db := config.Db
 
 	rows, err := db.Query("SELECT room_id FROM room_users WHERE user_id = ?", uid)
@@ -232,7 +232,7 @@ func userRooms(uid int64) []string {
 	return rooms
 }
 
-func userBelongsTo(uid int64, roomID int64) bool {
+func userBelongsTo(uid int, roomID int) bool {
 	db := config.Db
 
 	err := db.QueryRow("select 1 from room_users where room_id = ? and user_id = ?", roomID, uid).Err()
@@ -243,7 +243,7 @@ func userBelongsTo(uid int64, roomID int64) bool {
 	return true
 }
 
-func persistMessage(uid int64, msg IncomingMessage) (messageId int64, err error) {
+func persistMessage(uid int, msg IncomingMessage) (messageId int, err error) {
 	db := config.Db
 
 	result, err := db.Exec("INSERT INTO messages (content, room_id, user_id) VALUES (?, ?, ?)", msg.Content, msg.RoomID, uid)
@@ -251,10 +251,10 @@ func persistMessage(uid int64, msg IncomingMessage) (messageId int64, err error)
 		return 0, err
 	}
 
-	mid, err := result.LastInsertId()
+	messageID, err := result.LastInsertId()
 	if err != nil {
 		return 0, err
 	}
 
-	return mid, nil
+	return int(messageID), nil
 }

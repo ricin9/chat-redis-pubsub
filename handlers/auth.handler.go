@@ -57,7 +57,7 @@ func Signup(c *fiber.Ctx) error {
 			return
 		}
 	}()
-	err = utils.CreateSession(c, uid)
+	err = utils.CreateSession(c, int(uid))
 	if err != nil {
 		return c.Format("User created but couldn't create a session")
 	}
@@ -81,7 +81,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	db := config.Db
-	var uid int64
+	var uid int
 	var hash string
 	err = db.QueryRow("SELECT user_id, password FROM users WHERE username = ?", user.Username).Scan(&uid, &hash)
 	if err != nil {

@@ -1,5 +1,8 @@
-<div id="room-{{.RoomID}}-messages" class="overflow-y-auto mb-4 flex-grow">
-  {{range .Messages}} {{template "partials/message" .}} {{end}}
+<div
+  id="room-{{.RoomID}}-messages"
+  class="overflow-y-auto mb-4 flex-grow scroll-auto"
+>
+  {{template "partials/message-range-pagination" . }}
 </div>
 
 <form

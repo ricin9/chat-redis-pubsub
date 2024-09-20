@@ -1,0 +1,17 @@
+<!-- <div
+  hx-get="/rooms/{{.RoomID}}/messages?page={{or .NextPage 2}}"
+  hx-trigger="intersect once"
+  hx-swap="outerHTML"
+></div> -->
+{{range $i, $v := .Messages}} {{if not $i}}
+
+<div
+  class="mb-2"
+  id="last-message"
+  hx-get="/rooms/{{$.RoomID}}/messages?page={{or $.NextPage 2}}"
+  hx-trigger="intersect once"
+  hx-swap="beforebegin"
+>
+  <strong>{{.Username}}</strong>: {{.Content}}
+</div>
+{{else}} {{template "partials/message" .}} {{end}} {{end}}

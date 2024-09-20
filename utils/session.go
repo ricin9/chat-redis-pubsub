@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreateSession(c *fiber.Ctx, uid int64) error {
+func CreateSession(c *fiber.Ctx, uid int) error {
 	sid := uuid.NewString()
 	ip := c.Context().RemoteIP().String()
 	userAgent := string(c.Request().Header.UserAgent())

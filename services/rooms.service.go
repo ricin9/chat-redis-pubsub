@@ -9,7 +9,7 @@ type Room struct {
 	Name string
 }
 
-func GetRoomsFor(uid int64) (rooms []Room, err error) {
+func GetRoomsFor(uid int) (rooms []Room, err error) {
 	db := config.Db
 
 	rows, err := db.Query("SELECT r.room_id, r.name FROM rooms r JOIN room_users ru ON r.room_id = ru.room_id WHERE ru.user_id = ?", uid)

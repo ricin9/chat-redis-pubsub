@@ -24,7 +24,7 @@ func Authenticate(c *fiber.Ctx) error {
 
 	db := config.Db
 
-	var uid int64
+	var uid int
 	err := db.QueryRow("SELECT user_id FROM sessions WHERE session_id = ? AND expires_at > datetime('now')", sid).Scan(&uid)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

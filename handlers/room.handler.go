@@ -7,7 +7,6 @@ import (
 	"ricin9/fiber-chat/services"
 	"ricin9/fiber-chat/utils"
 	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,7 +17,7 @@ type CreateRoomInput struct {
 }
 
 func GetRoom(c *fiber.Ctx) error {
-	uid := c.Locals("uid").(int64)
+	uid := c.Locals("uid").(int)
 	roomID, err := c.ParamsInt("id")
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -31,28 +30,9 @@ func GetRoom(c *fiber.Ctx) error {
 		return c.Format("you are not a member of this room")
 	}
 
-	rows, err := db.Query("SELECT m.message_id, m.content, m.created_at, u.user_id, u.username FROM messages m JOIN users u ON m.user_id = u.user_id WHERE m.room_id = ? ORDER BY m.message_id ASC", roomID)
+	messages, err := services.GetMessages(uid, roomID, 1)
 	if err != nil {
-		return c.Format("error fetching messages")
-	}
-
-	type Message struct {
-		ID        int
-		Content   string
-		CreatedAt time.Time
-		UserID    int
-		Username  string
-	}
-
-	var messages []Message
-	for rows.Next() {
-		var message Message
-		err := rows.Scan(&message.ID, &message.Content, &message.CreatedAt, &message.UserID, &message.Username)
-		if err != nil {
-			return c.Format("error scanning messages")
-		}
-
-		messages = append(messages, message)
+		return c.Format("Error getting messages")
 	}
 
 	if c.Get("HX-Request") != "" {
@@ -104,7 +84,7 @@ func CreateRoom(c *fiber.Ctx) error {
 	sqlInStatement := strings.Repeat("?,", len(users))
 	sqlInStatement, _ = strings.CutSuffix(sqlInStatement, ",") // remove trailing comma
 
-	uid := c.Locals("uid").(int64)
+	uid := c.Locals("uid")
 
 	args := []any{roomID, uid}
 	args = append(args, usersAny...)

@@ -9,7 +9,7 @@ import (
 
 func IndexPage(c *fiber.Ctx) error {
 	{
-		uid := c.Locals("uid").(int64)
+		uid := c.Locals("uid").(int)
 
 		rooms, err := services.GetRoomsFor(uid)
 		if err != nil {

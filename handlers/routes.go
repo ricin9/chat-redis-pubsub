@@ -24,8 +24,6 @@ func Setup(app *fiber.App) {
 	app.Post("/signup", Signup)
 
 	app.Get("/logout", Logout)
-	// Create a /api/v1 endpoint
-	v1 := app.Group("/api/v1")
 
 	app.Get("/create-room", middleware.Authenticate, func(c *fiber.Ctx) error {
 		return c.Render("pages/create-room", nil, "layouts/base")
@@ -33,8 +31,10 @@ func Setup(app *fiber.App) {
 
 	app.Post("/create-room", middleware.Authenticate, CreateRoom)
 
+	app.Get("/rooms/:id/messages", middleware.Authenticate, GetMessages)
+
 	// websockets
-	v1.Use("/ws", middleware.Authenticate, func(c *fiber.Ctx) error {
+	app.Use("/ws", middleware.Authenticate, func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("allowed", true)
 			return c.Next()
@@ -42,7 +42,7 @@ func Setup(app *fiber.App) {
 		return fiber.ErrUpgradeRequired
 	})
 
-	v1.Get("/ws", websocket.New(Websocket))
+	app.Get("/ws", websocket.New(Websocket))
 
 	app.Static("/", "./static")
 
