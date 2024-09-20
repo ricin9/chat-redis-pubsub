@@ -174,11 +174,12 @@ func handleIncoming(c *websocket.Conn, uid int64, done chan struct{}) {
 			continue
 		}
 
+		username := getUsername(uid)
 		outgoing := PublishMessagePayload{
 			ID:        messageId,
 			UserID:    uid,
 			RoomID:    msg.RoomID,
-			Username:  "username", // todo: set and get username in locals
+			Username:  username,
 			Content:   msg.Content,
 			CreatedAt: time.Now(),
 		}
@@ -192,6 +193,19 @@ func handleIncoming(c *websocket.Conn, uid int64, done chan struct{}) {
 		rdb := config.RedisClient
 		rdb.Publish(context.Background(), strconv.FormatInt(msg.RoomID, 10), payload)
 	}
+}
+
+func getUsername(uid int64) string {
+	db := config.Db
+
+	var username string
+	err := db.QueryRow("SELECT username FROM users WHERE user_id = ?", uid).Scan(&username)
+	if err != nil {
+		log.Println("error getting username", err)
+		return "unknown"
+	}
+
+	return username
 }
 func userRooms(uid int64) []string {
 	db := config.Db
