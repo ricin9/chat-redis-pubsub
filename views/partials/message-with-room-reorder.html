@@ -1,0 +1,7 @@
+<div
+  id="room-{{.RoomID}}-messages"
+  data-room-id="{{.RoomID}}"
+  hx-swap-oob="beforeend"
+>
+  {{template "partials/message" .}}
+</div>

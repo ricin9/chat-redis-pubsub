@@ -1,4 +1,4 @@
-<div id="messages" class="overflow-y-auto mb-4 flex-grow">
+<div id="room-{{.RoomID}}-messages" class="overflow-y-auto mb-4 flex-grow">
   {{range .Messages}} {{template "partials/message" .}} {{end}}
 </div>
 
@@ -14,6 +14,8 @@
     name="Content"
     class="w-full p-2 border rounded"
     placeholder="Type your message..."
+    required
+    minlength="1"
   />
   <button
     type="submit"

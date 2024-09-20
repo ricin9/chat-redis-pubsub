@@ -1,0 +1,39 @@
+<form hx-post="/create-room">
+  <p id="message" class="text-yellow-500 text-sm mt-1">{{.Message}}</p>
+  <div class="mb-4">
+    <label for="name" class="block mb-2">Room Name</label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      class="w-full p-2 border rounded"
+      required
+      value="{{.Room.Name}}"
+      placeholder="My wonderful room"
+      oninput="this.nextElementSibling.textContent = ''"
+    />
+    <p class="text-red-500 text-sm mt-1">{{.Errors.Name}}</p>
+  </div>
+
+  <div class="mb-4">
+    <label for="users" class="block mb-2">Users</label>
+    <p class="text-xs text-gray-500">Comma separated list of usernames</p>
+    <input
+      type="text"
+      id="users"
+      name="users"
+      class="w-full p-2 border rounded"
+      required
+      oninput="this.nextElementSibling.textContent = ''"
+      placeholder="ricin, miloudi, cricket"
+      value="{{.Room.Users}}"
+    />
+    <p class="text-red-500 text-sm mt-1">{{.Errors.Users}}</p>
+  </div>
+  <button
+    type="submit"
+    class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+  >
+    Create Room
+  </button>
+</form>

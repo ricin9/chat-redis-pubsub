@@ -1,0 +1,28 @@
+<li class="mb-2" id="room-{{.ID}}">
+  <button
+    hx-get="/rooms/{{.ID}}"
+    hx-target="#room-messages"
+    hx-swap="innerHTML scroll:#room-{{.ID}}-messages:bottom"
+    hx-push-url="true"
+    class="text-blue-600 hover:underline"
+    onclick="hightlightRoom(this)"
+  >
+    {{.Name}}
+  </button>
+</li>
+
+<script>
+  function hightlightRoom(button) {
+    const rooms = document.querySelectorAll(".selected-room");
+    rooms.forEach((room) => {
+      room.classList.remove("selected-room");
+    });
+    button.parentElement.classList.add("selected-room");
+  }
+</script>
+
+<style>
+  .selected-room {
+    background-color: rgb(219 234 254 / var(--tw-bg-opacity)) /* #dbeafe */;
+  }
+</style>
