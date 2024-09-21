@@ -1,17 +1,23 @@
-<!-- <div
-  hx-get="/rooms/{{.RoomID}}/messages?page={{or .NextPage 2}}"
-  hx-trigger="intersect once"
-  hx-swap="outerHTML"
-></div> -->
-{{range $i, $v := .Messages}} {{if not $i}}
+{{range $i, $v := .Messages}}
 
 <div
-  class="mb-2"
-  id="last-message"
+  class="flex items-start space-x-2 mt-4"
+  {{if
+  not
+  $i}}
   hx-get="/rooms/{{$.RoomID}}/messages?page={{or $.NextPage 2}}"
-  hx-trigger="intersect threshold:0.1 once root:#room-{{$.RoomID}}-messages"
+  hx-trigger="intersect threshold:0.1 once root:#room-{{$.RoomID}}-messages delay:100ms"
   hx-swap="beforebegin"
+  {{end}}
 >
-  <strong>{{.Username}}</strong>: {{.Content}}
+  <img
+    src="https://via.placeholder.com/40"
+    alt="User Avatar"
+    class="w-10 h-10 rounded-full"
+  />
+  <div>
+    <p class="font-medium">{{.Username}}</p>
+    <p class="bg-white p-2 rounded-lg shadow">{{.Content}}</p>
+  </div>
 </div>
-{{else}} {{template "partials/message" .}} {{end}} {{end}}
+{{end}}

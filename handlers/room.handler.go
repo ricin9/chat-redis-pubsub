@@ -25,7 +25,8 @@ func GetRoom(c *fiber.Ctx) error {
 
 	db := config.Db
 
-	err = db.QueryRow("select 1 from room_users where room_id = ? and user_id = ?", roomID, uid).Err()
+	var roomName string
+	err = db.QueryRow("select rooms.name from room_users join rooms using (room_id) where room_id = ? and user_id = ?", roomID, uid).Scan(&roomName)
 	if err != nil {
 		return c.Format("you are not a member of this room")
 	}
@@ -36,7 +37,7 @@ func GetRoom(c *fiber.Ctx) error {
 	}
 
 	if c.Get("HX-Request") != "" {
-		return c.Render("partials/messages", fiber.Map{"Messages": messages, "RoomID": roomID})
+		return c.Render("partials/room-content", fiber.Map{"Messages": messages, "RoomID": roomID, "RoomName": roomName})
 	}
 
 	rooms, err := services.GetRoomsFor(uid)
@@ -44,7 +45,7 @@ func GetRoom(c *fiber.Ctx) error {
 		log.Println("Error getting rooms: ", err)
 	}
 
-	return c.Render("pages/index", fiber.Map{"Messages": messages, "Rooms": rooms, "RoomID": roomID}, "layouts/base")
+	return c.Render("layouts/main", fiber.Map{"Messages": messages, "Rooms": rooms, "RoomID": roomID, "RoomName": roomName})
 }
 
 func CreateRoom(c *fiber.Ctx) error {

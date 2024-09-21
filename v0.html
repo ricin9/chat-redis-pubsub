@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div class="flex h-screen">
+      <!-- Sidebar -->
+      <div
+        id="sidebar"
+        class="w-64 bg-white shadow-md fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-20"
+      >
+        <div class="p-4 bg-blue-600 flex justify-between items-center">
+          <h1 class="text-white text-xl font-bold">Chat App</h1>
+          <button id="closeSidebar" class="text-white md:hidden">
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+        <div class="p-4">
+          <h2 class="text-lg font-semibold mb-2">Rooms</h2>
+          <ul id="roomList">
+            <li class="mb-2">
+              <a
+                href="#"
+                class="block p-2 rounded hover:bg-gray-100 transition duration-150 ease-in-out flex justify-between items-center"
+              >
+                <span># General</span>
+                <span
+                  class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full"
+                  >3</span
+                >
+              </a>
+            </li>
+            <li class="mb-2">
+              <a
+                href="#"
+                class="block p-2 rounded hover:bg-gray-100 transition duration-150 ease-in-out flex justify-between items-center"
+              >
+                <span># Random</span>
+                <span
+                  class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full"
+                  >1</span
+                >
+              </a>
+            </li>
+            <li class="mb-2">
+              <a
+                href="#"
+                class="block p-2 rounded bg-blue-100 text-blue-600 font-medium flex justify-between items-center"
+              >
+                <span># Tech Talk</span>
+              </a>
+            </li>
+          </ul>
+          <button
+            id="createRoomBtn"
+            class="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-150 ease-in-out"
+          >
+            Create New Room
+          </button>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-4">
+          <button
+            id="logoutBtn"
+            class="w-full bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-150 ease-in-out"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <header
+          class="bg-white shadow-sm p-4 flex justify-between items-center"
+        >
+          <div class="flex items-center">
+            <button id="openSidebar" class="mr-4 md:hidden">
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+              </svg>
+            </button>
+            <h2 class="text-xl font-semibold"># Tech Talk</h2>
+          </div>
+          <button
+            id="logoutBtnMobile"
+            class="bg-red-500 text-white px-3 py-1 rounded-full md:hidden"
+          >
+            Logout
+          </button>
+        </header>
+
+        <!-- Chat Area -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          <div class="flex items-start space-x-2">
+            <img
+              src="https://via.placeholder.com/40"
+              alt="User Avatar"
+              class="w-10 h-10 rounded-full"
+            />
+            <div>
+              <p class="font-medium">John Doe</p>
+              <p class="bg-white p-2 rounded-lg shadow">
+                Hey everyone! How's it going?
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-2 justify-end">
+            <div>
+              <p class="font-medium text-right">You</p>
+              <p class="bg-blue-600 text-white p-2 rounded-lg shadow">
+                Hi John! All good here, how about you?
+              </p>
+            </div>
+            <img
+              src="https://via.placeholder.com/40"
+              alt="Your Avatar"
+              class="w-10 h-10 rounded-full"
+            />
+          </div>
+          <div class="flex items-start space-x-2">
+            <img
+              src="https://via.placeholder.com/40"
+              alt="User Avatar"
+              class="w-10 h-10 rounded-full"
+            />
+            <div>
+              <p class="font-medium">Jane Smith</p>
+              <p class="bg-white p-2 rounded-lg shadow">
+                I'm excited about the new project we're starting!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message Input -->
+        <div class="bg-white p-4 border-t">
+          <form class="flex space-x-2">
+            <input
+              type="text"
+              placeholder="Type your message..."
+              class="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+            <button
+              type="submit"
+              class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-150 ease-in-out"
+            >
+              Send
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div
+      id="createRoomModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center"
+    >
+      <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4">Create New Room</h2>
+        <form id="createRoomForm" class="space-y-4">
+          <div>
+            <label
+              for="roomName"
+              class="block text-sm font-medium text-gray-700"
+              >Room Name</label
+            >
+            <input
+              type="text"
+              id="roomName"
+              name="roomName"
+              required
+              class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label
+              for="roomUsers"
+              class="block text-sm font-medium text-gray-700"
+              >Users (comma-separated)</label
+            >
+            <input
+              type="text"
+              id="roomUsers"
+              name="roomUsers"
+              required
+              class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button
+              type="button"
+              id="cancelCreateRoom"
+              class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Create Room
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const sidebar = document.getElementById("sidebar");
+      const openSidebarBtn = document.getElementById("openSidebar");
+      const closeSidebarBtn = document.getElementById("closeSidebar");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const logoutBtnMobile = document.getElementById("logoutBtnMobile");
+      const createRoomBtn = document.getElementById("createRoomBtn");
+      const createRoomModal = document.getElementById("createRoomModal");
+      const createRoomForm = document.getElementById("createRoomForm");
+      const cancelCreateRoomBtn = document.getElementById("cancelCreateRoom");
+      const roomList = document.getElementById("roomList");
+
+      openSidebarBtn.addEventListener("click", () => {
+        sidebar.classList.remove("-translate-x-full");
+      });
+
+      closeSidebarBtn.addEventListener("click", () => {
+        sidebar.classList.add("-translate-x-full");
+      });
+
+      function logout() {
+        window.location.href = "signin.html";
+      }
+
+      logoutBtn.addEventListener("click", logout);
+      logoutBtnMobile.addEventListener("click", logout);
+
+      createRoomBtn.addEventListener("click", () => {
+        createRoomModal.classList.remove("hidden");
+        createRoomModal.classList.add("flex");
+      });
+
+      cancelCreateRoomBtn.addEventListener("click", () => {
+        createRoomModal.classList.add("hidden");
+        createRoomModal.classList.remove("flex");
+      });
+
+      createRoomForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const roomName = document.getElementById("roomName").value;
+        const roomUsers = document
+          .getElementById("roomUsers")
+          .value.split(",")
+          .map((user) => user.trim());
+
+        // Here you would typically send a request to your server to create a new room
+        // For this example, we'll just add it to the room list
+        const newRoom = document.createElement("li");
+        newRoom.className = "mb-2";
+        newRoom.innerHTML = `
+                <a href="#" class="block p-2 rounded hover:bg-gray-100 transition duration-150 ease-in-out flex justify-between items-center">
+                    <span># ${roomName}</span>
+                </a>
+            `;
+        roomList.appendChild(newRoom);
+
+        createRoomModal.classList.add("hidden");
+        createRoomModal.classList.remove("flex");
+        createRoomForm.reset();
+      });
+    </script>
+  </body>
+</html>

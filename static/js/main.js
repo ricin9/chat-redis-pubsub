@@ -1,3 +1,16 @@
+document.addEventListener("DOMContentLoaded", function () {
+  const currentRoomId = location.pathname.split("/").pop();
+  if (!currentRoomId || Number.isNaN(Number(currentRoomId))) {
+    return;
+  }
+
+  const messages = document.getElementById(`room-${currentRoomId}-messages`);
+  if (!messages) {
+    return;
+  }
+
+  messages.scrollTo(0, messages.scrollHeight);
+});
 document.addEventListener("htmx:wsAfterMessage", function (event) {
   if (!event.detail.message.includes("data-room-id")) {
     return;
@@ -24,7 +37,7 @@ document.addEventListener("htmx:wsAfterMessage", function (event) {
   }
   // Check if user is near the bottom
   const isAtBottom =
-    messages.scrollHeight - messages.scrollTop <= messages.clientHeight + 50;
+    messages.scrollHeight - messages.scrollTop <= messages.clientHeight + 100;
 
   if (isAtBottom) {
     messages.scrollTo(0, messages.scrollHeight);

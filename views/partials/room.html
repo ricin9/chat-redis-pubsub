@@ -1,18 +1,18 @@
 <li class="mb-2" id="room-{{.ID}}">
-  <button
+  <a
+    class="p-2 rounded hover:bg-gray-100 transition duration-150 ease-in-out flex justify-between items-center"
+    href="/rooms/{{.ID}}"
     hx-get="/rooms/{{.ID}}"
-    hx-target="#room-messages"
-    hx-swap="innerHTML scroll:#room-{{.ID}}-messages:bottom"
+    hx-target="#room-content"
+    hx-swap="outerHTML scroll:#room-{{.ID}}-messages:bottom"
     hx-push-url="true"
-    class="text-blue-600 hover:underline w-full text-left flex"
     hx-on:click="hightlightRoom(this); resetUnread({{.ID}});"
   >
-    <span class="flex-grow"> {{.Name}} </span>
-    <div
-      title="Unread messages"
-      class="inline-flex items-center justify-center w-5 h-5 ms-2 text-sm font-semibold text-blue-800 empty:bg-inherit bg-blue-200 rounded-full"
-    ></div>
-  </button>
+    <span># {{.Name}}</span>
+    <span
+      class="empty:hidden bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full transition duration-150 ease-in-out"
+    ></span>
+  </a>
 </li>
 
 <script>
@@ -24,9 +24,3 @@
     button.parentElement.classList.add("selected-room");
   }
 </script>
-
-<style>
-  .selected-room {
-    background-color: rgb(219 234 254 / var(--tw-bg-opacity)) /* #dbeafe */;
-  }
-</style>

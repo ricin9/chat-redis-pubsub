@@ -1,7 +1,10 @@
 <div class="flex h-[calc(100vh-8rem)]">
   <!-- Rooms list -->
   <div class="w-1/4 bg-white rounded shadow p-4 flex flex-col h-full">
-    <h2 class="text-xl font-bold mb-4">Rooms</h2>
+    <h2 class="text-xl font-bold mb-2">Rooms</h2>
+    <h3 hx-get="/create-room" class="text-base font-bold mb-4">
+      <a href="/create-room">Create a room</a>
+    </h3>
     <ul id="room-list" class="overflow-y-auto flex-grow">
       {{range .Rooms}} {{template "partials/room" .}} {{end}} {{if .RoomID}}
       <script>
