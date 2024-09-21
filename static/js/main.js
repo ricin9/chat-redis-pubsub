@@ -1,26 +1,3 @@
-document.addEventListener("htmx:wsBeforeMessage", function (event) {
-  if (!event.detail.message.includes("data-room-id")) {
-    return;
-  }
-
-  const currentRoom = document.querySelector(".selected-room");
-  const currentRoomId = currentRoom
-    ? currentRoom.id.replace("room-", "")
-    : null;
-
-  if (!currentRoomId) {
-    return;
-  }
-
-  const wsElt = document.createElement("div");
-  wsElt.innerHTML = event.detail.message;
-  const IncomingMessageRoomId = wsElt.firstChild.getAttribute("data-room-id");
-
-  if (currentRoomId !== IncomingMessageRoomId) {
-    console.log("Message from another room, not swapping", event.detail);
-  }
-});
-
 document.addEventListener("htmx:wsAfterMessage", function (event) {
   if (!event.detail.message.includes("data-room-id")) {
     return;
@@ -36,7 +13,7 @@ document.addEventListener("htmx:wsAfterMessage", function (event) {
   const IncomingMessageRoomId = wsElt.firstChild.getAttribute("data-room-id");
 
   if (currentRoomId !== IncomingMessageRoomId) {
-    // show notification actually
+    incrementUnread(IncomingMessageRoomId);
     return;
   }
 
@@ -51,8 +28,9 @@ document.addEventListener("htmx:wsAfterMessage", function (event) {
 
   if (isAtBottom) {
     messages.scrollTo(0, messages.scrollHeight);
+  } else {
+    incrementUnread(currentRoomId);
   }
-  // TODO, show notification if user is not at the bottom
 
   const room = document.getElementById(`room-${currentRoomId}`);
   const roomList = document.getElementById("room-list");
@@ -61,3 +39,72 @@ document.addEventListener("htmx:wsAfterMessage", function (event) {
     roomList.prepend(room);
   }
 });
+
+function incrementUnread(roomId) {
+  const room = document.getElementById(`room-${roomId}`);
+  if (!room) {
+    return;
+  }
+
+  const unread = room.children[0].children[1];
+  if (!unread) {
+    return;
+  }
+
+  const count = parseInt(unread.innerText) || 0;
+  unread.innerText = count + 1;
+
+  const countInTitle = document.title.split(" ")[0];
+  if (
+    countInTitle[0] === "(" &&
+    countInTitle[countInTitle.length - 1] === ")"
+  ) {
+    const count = parseInt(countInTitle.slice(1, countInTitle.length - 1)) || 0;
+    document.title = `(${count + 1}) ${document.title
+      .split(" ")
+      .slice(1)
+      .join(" ")}`;
+  } else {
+    document.title = `(1) ${document.title}`;
+  }
+}
+
+function resetUnread(roomId) {
+  const room = document.getElementById(`room-${roomId}`);
+  if (!room) {
+    return;
+  }
+
+  const unread = room.children[0].children[1];
+  if (!unread) {
+    return;
+  }
+
+  const currentCount = parseInt(unread.innerText) || 0;
+  if (currentCount === 0) {
+    return;
+  }
+
+  unread.innerText = "";
+
+  const countInTitle = document.title.split(" ")[0];
+  if (
+    countInTitle[0] !== "(" ||
+    countInTitle[countInTitle.length - 1] !== ")"
+  ) {
+    return;
+  }
+
+  const count = parseInt(countInTitle.slice(1, countInTitle.length - 1)) || 0;
+  const newCount = count - currentCount;
+
+  if (newCount <= 0) {
+    document.title = document.title.split(" ").slice(1).join(" ");
+    return;
+  }
+
+  document.title = `(${newCount}) ${document.title
+    .split(" ")
+    .slice(1)
+    .join(" ")}`;
+}

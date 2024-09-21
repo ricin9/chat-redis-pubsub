@@ -4,10 +4,14 @@
     hx-target="#room-messages"
     hx-swap="innerHTML scroll:#room-{{.ID}}-messages:bottom"
     hx-push-url="true"
-    class="text-blue-600 hover:underline"
-    onclick="hightlightRoom(this)"
+    class="text-blue-600 hover:underline w-full text-left flex"
+    hx-on:click="hightlightRoom(this); resetUnread({{.ID}});"
   >
-    {{.Name}}
+    <span class="flex-grow"> {{.Name}} </span>
+    <div
+      title="Unread messages"
+      class="inline-flex items-center justify-center w-5 h-5 ms-2 text-sm font-semibold text-blue-800 empty:bg-inherit bg-blue-200 rounded-full"
+    ></div>
   </button>
 </li>
 
