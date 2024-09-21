@@ -146,3 +146,25 @@ document.addEventListener("focus", function (event) {
     resetUnread(currentRoomId);
   }
 });
+
+const sidebar = document.getElementById("sidebar");
+const createRoomBtn = document.getElementById("createRoomBtn");
+const createRoomModal = document.getElementById("createRoomModal");
+
+function closeSidebar() {
+  sidebar.classList.add("-translate-x-full");
+}
+
+function openSidebar() {
+  sidebar.classList.remove("-translate-x-full");
+}
+createRoomBtn.addEventListener("click", () => {
+  closeSidebar();
+  createRoomModal.classList.remove("hidden");
+  createRoomModal.classList.add("flex");
+});
+
+function closeCreateRoomModal() {
+  createRoomModal.classList.add("hidden");
+  createRoomModal.classList.remove("flex");
+}

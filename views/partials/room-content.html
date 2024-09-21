@@ -2,7 +2,11 @@
   <!-- Header -->
   <header class="bg-white shadow-sm p-4 flex justify-between items-center">
     <div class="flex items-center">
-      <button id="openSidebar" class="mr-4 md:hidden">
+      <button
+        id="openSidebar"
+        class="mr-4 md:hidden"
+        hx-on:click="openSidebar();"
+      >
         <svg
           class="w-6 h-6"
           fill="none"

@@ -20,7 +20,11 @@
       >
         <div class="p-4 bg-blue-600 flex justify-between items-center">
           <h1 class="text-white text-xl font-bold">Chat App</h1>
-          <button id="closeSidebar" class="text-white md:hidden">
+          <button
+            id="closeSidebar"
+            class="text-white md:hidden"
+            hx-on:click="closeSidebar()"
+          >
             <svg
               class="w-6 h-6"
               fill="none"
@@ -39,9 +43,9 @@
         </div>
 
         <!-- Room List -->
-        <div class="p-4">
+        <div class="p-4 flex flex-col h-[calc(100vh-4rem)]">
           <h2 class="text-lg font-semibold mb-2">Rooms</h2>
-          <ul id="room-list">
+          <ul id="room-list" class="overflow-y-auto flex-grow">
             {{range .Rooms}} {{template "partials/room" .}} {{end}} {{if
             .RoomID}}
             <script>
@@ -51,20 +55,21 @@
             </script>
             {{end}}
           </ul>
-          <button
-            id="createRoomBtn"
-            class="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-150 ease-in-out"
-          >
-            Create New Room
-          </button>
-        </div>
-        <div class="absolute bottom-0 left-0 right-0 p-4">
-          <button
-            id="logoutBtn"
-            class="w-full bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-150 ease-in-out"
-          >
-            Logout
-          </button>
+
+          <div class="mt-auto">
+            <button
+              id="createRoomBtn"
+              class="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-150 ease-in-out"
+            >
+              Create New Room
+            </button>
+            <button
+              id="logoutBtn"
+              class="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-150 ease-in-out"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
@@ -79,80 +84,8 @@
     >
       <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
         <h2 class="text-2xl font-bold mb-4">Create New Room</h2>
-        <form id="createRoomForm" class="space-y-4">
-          <div>
-            <label
-              for="roomName"
-              class="block text-sm font-medium text-gray-700"
-              >Room Name</label
-            >
-            <input
-              type="text"
-              id="roomName"
-              name="roomName"
-              required
-              class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label
-              for="roomUsers"
-              class="block text-sm font-medium text-gray-700"
-              >Users (comma-separated)</label
-            >
-            <input
-              type="text"
-              id="roomUsers"
-              name="roomUsers"
-              required
-              class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div class="flex justify-end space-x-2">
-            <button
-              type="button"
-              id="cancelCreateRoom"
-              class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Create Room
-            </button>
-          </div>
-        </form>
+        {{template "partials/create-room-form" .}}
       </div>
     </div>
-
-    <script>
-      const sidebar = document.getElementById("sidebar");
-      const openSidebarBtn = document.getElementById("openSidebar");
-      const closeSidebarBtn = document.getElementById("closeSidebar");
-      const logoutBtn = document.getElementById("logoutBtn");
-      const createRoomBtn = document.getElementById("createRoomBtn");
-      const createRoomModal = document.getElementById("createRoomModal");
-      const cancelCreateRoomBtn = document.getElementById("cancelCreateRoom");
-
-      openSidebarBtn.addEventListener("click", () => {
-        sidebar.classList.remove("-translate-x-full");
-      });
-
-      closeSidebarBtn.addEventListener("click", () => {
-        sidebar.classList.add("-translate-x-full");
-      });
-
-      createRoomBtn.addEventListener("click", () => {
-        createRoomModal.classList.remove("hidden");
-        createRoomModal.classList.add("flex");
-      });
-
-      cancelCreateRoomBtn.addEventListener("click", () => {
-        createRoomModal.classList.add("hidden");
-        createRoomModal.classList.remove("flex");
-      });
-    </script>
   </body>
 </html>

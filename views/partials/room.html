@@ -6,7 +6,7 @@
     hx-target="#room-content"
     hx-swap="outerHTML scroll:#room-{{.ID}}-messages:bottom"
     hx-push-url="true"
-    hx-on:click="hightlightRoom(this); resetUnread({{.ID}});"
+    hx-on:click="hightlightRoom(this); resetUnread({{.ID}}); closeSidebar();"
   >
     <span># {{.Name}}</span>
     <span

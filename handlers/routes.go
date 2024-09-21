@@ -14,7 +14,7 @@ func Setup(app *fiber.App) {
 	app.Get("/rooms/:id", middleware.Authenticate, GetRoom)
 
 	app.Get("/login", func(c *fiber.Ctx) error {
-		return c.Render("pages/login", fiber.Map{"Guest": true}, "layouts/base")
+		return c.Render("pages/login", fiber.Map{"Guest": true})
 	})
 	app.Post("/login", Login)
 

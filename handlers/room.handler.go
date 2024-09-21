@@ -59,7 +59,7 @@ func CreateRoom(c *fiber.Ctx) error {
 	err := validate.Struct(room)
 	if err != nil {
 		errors := utils.FormatErrors(err)
-		return c.Render("partials/signup-form", fiber.Map{"Errors": errors, "Room": room})
+		return c.Render("partials/create-room-form", fiber.Map{"Errors": errors, "Room": room})
 	}
 
 	users := strings.Split(room.Users, ",")
@@ -90,6 +90,7 @@ func CreateRoom(c *fiber.Ctx) error {
 	args := []any{roomID, uid}
 	args = append(args, usersAny...)
 
+	fmt.Println("creating room,", room)
 	_, err = db.Exec(fmt.Sprintf(`INSERT INTO room_users (room_id, user_id)
 	 select ? as room_id, user_id from users where user_id = ? OR username IN (%s)`, sqlInStatement), args...)
 
@@ -98,6 +99,7 @@ func CreateRoom(c *fiber.Ctx) error {
 		return c.Format("Error adding users to room")
 	}
 
+	fmt.Println("room created,", room)
 	c.Set("HX-Redirect", "/")
 	return c.SendStatus(201)
 }

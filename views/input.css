@@ -5,6 +5,6 @@
 
 @layer components {
     .selected-room {
-        @apply bg-blue-100 text-blue-600 font-medium important 
+        @apply bg-blue-100 text-blue-600 font-medium 
     }
 }
