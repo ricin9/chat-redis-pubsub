@@ -2,6 +2,7 @@
   id="room-{{.RoomID}}-messages"
   class="overflow-y-auto mb-4 flex-grow scroll-auto"
   hx-on:scroll="if (this.scrollHeight - this.scrollTop === this.clientHeight) { resetUnread({{.RoomID}}); }"
+  hx-on:focus="cosole.log('focus changed');"
 >
   {{template "partials/message-range-pagination" . }}
 </div>

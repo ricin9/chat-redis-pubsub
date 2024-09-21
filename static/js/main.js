@@ -28,6 +28,9 @@ document.addEventListener("htmx:wsAfterMessage", function (event) {
 
   if (isAtBottom) {
     messages.scrollTo(0, messages.scrollHeight);
+    if (!document.hasFocus()) {
+      incrementUnread(currentRoomId);
+    }
   } else {
     incrementUnread(currentRoomId);
   }
@@ -70,6 +73,9 @@ function incrementUnread(roomId) {
 }
 
 function resetUnread(roomId) {
+  if (!document.hasFocus()) {
+    return;
+  }
   const room = document.getElementById(`room-${roomId}`);
   if (!room) {
     return;
@@ -108,3 +114,22 @@ function resetUnread(roomId) {
     .slice(1)
     .join(" ")}`;
 }
+
+document.addEventListener("focus", function (event) {
+  if (!document.hasFocus()) {
+    return;
+  }
+  const currentRoomId = location.pathname.split("/").pop();
+  if (!currentRoomId || Number.isNaN(Number(currentRoomId))) {
+    return;
+  }
+
+  const messages = document.getElementById(`room-${currentRoomId}-messages`);
+  if (!messages) {
+    return;
+  }
+
+  if (messages.scrollHeight - messages.scrollTop === messages.clientHeight) {
+    resetUnread(currentRoomId);
+  }
+});
