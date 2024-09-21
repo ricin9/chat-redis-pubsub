@@ -1,13 +1,3 @@
-{{define "partials/message"}}
-<div class="flex items-start space-x-2 mt-4">
-  <img
-    src="https://via.placeholder.com/40"
-    alt="User Avatar"
-    class="w-10 h-10 rounded-full"
-  />
-  <div>
-    <p class="font-medium">{{.Username}}</p>
-    <p class="bg-white p-2 rounded-lg shadow">{{.Content}}</p>
-  </div>
-</div>
-{{end}}
+{{define "partials/message"}} {{ if eq .UserID $.uid }} {{template
+"partials/message-right" .}} {{ else }} {{template "partials/message-left" .}}
+{{ end }} {{end}}

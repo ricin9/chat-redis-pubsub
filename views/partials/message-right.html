@@ -1,0 +1,13 @@
+{{define "partials/message-right"}}
+<div class="flex items-start space-x-2 justify-end mt-4">
+  <div>
+    <p class="font-medium text-right">You</p>
+    <p class="bg-blue-600 text-white p-2 rounded-lg shadow">{{.Content}}</p>
+  </div>
+  <img
+    src="https://via.placeholder.com/40"
+    alt="Your Avatar"
+    class="w-10 h-10 rounded-full"
+  />
+</div>
+{{end}}

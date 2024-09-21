@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gofiber/contrib/websocket"
+	"github.com/gofiber/fiber/v2"
 )
 
 type PublishMessagePayload struct {
@@ -27,6 +29,7 @@ type PublishMessagePayload struct {
 type IncomingMessage struct {
 	Content string `json:"content"`
 	RoomID  int    `json:"room_id"`
+	ReplyTo int    `json:"reply_to"`
 }
 
 type RoomChangePayload struct {
@@ -127,14 +130,27 @@ func handeleSubscription(c *websocket.Conn, rooms []string, writeMu *sync.Mutex,
 				return
 			}
 
-			tmpl, err := template.ParseFiles("views/partials/message-with-room-reorder.html", "views/partials/message.html")
+			tmpl, err := template.ParseFiles("views/partials/message-with-room-reorder.html",
+				"views/partials/message.html",
+				"views/partials/message-right.html",
+				"views/partials/message-left.html")
 			if err != nil {
 				fmt.Println("could not find template file", err)
 				break
 			}
 
 			var output bytes.Buffer
-			err = tmpl.Execute(&output, payload)
+			err = tmpl.Execute(&output, fiber.Map{
+				"ID":        payload.ID,
+				"UserID":    payload.UserID,
+				"RoomID":    payload.RoomID,
+				"Username":  payload.Username,
+				"Content":   payload.Content,
+				"CreatedAt": payload.CreatedAt,
+				"uid":       c.Locals("uid"),
+			})
+
+			fmt.Println("message user id", payload.UserID, "current user id", c.Locals("uid"))
 			if err != nil {
 				fmt.Println("error executing template", err)
 				break
@@ -165,6 +181,11 @@ func handleIncoming(c *websocket.Conn, uid int, done chan struct{}) {
 
 		if !userBelongsTo(uid, msg.RoomID) {
 			log.Println("user does not belong to room")
+			continue
+		}
+
+		if msg.ReplyTo != 0 && !messageBelongsToRoom(msg.ReplyTo, msg.RoomID) {
+			log.Println("message does not belong to room")
 			continue
 		}
 
@@ -243,10 +264,25 @@ func userBelongsTo(uid int, roomID int) bool {
 	return true
 }
 
+func messageBelongsToRoom(messageID int, roomID int) bool {
+	db := config.Db
+
+	err := db.QueryRow("select 1 from messages where message_id = ? and room_id = ?", messageID, roomID).Err()
+	if err != nil {
+		return false
+	}
+
+	return true
+}
 func persistMessage(uid int, msg IncomingMessage) (messageId int, err error) {
 	db := config.Db
 
-	result, err := db.Exec("INSERT INTO messages (content, room_id, user_id) VALUES (?, ?, ?)", msg.Content, msg.RoomID, uid)
+	var replyto sql.NullInt64
+	if msg.ReplyTo != 0 {
+		replyto = sql.NullInt64{Int64: int64(msg.ReplyTo), Valid: true}
+	}
+
+	result, err := db.Exec("INSERT INTO messages (content, room_id, user_id, reply_to) VALUES (?, ?, ?, ?)", msg.Content, msg.RoomID, uid, replyto)
 	if err != nil {
 		return 0, err
 	}

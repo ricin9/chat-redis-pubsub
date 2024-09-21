@@ -28,7 +28,7 @@ func GetMessages(c *fiber.Ctx) error {
 	}
 
 	if len(messages) == 0 {
-		return c.Format("No more messages")
+		return c.Format(`<p class="text-gray-500 text-sm text-center">No more messages</p>`)
 	}
 
 	return c.Render("partials/message-range-pagination", fiber.Map{"Messages": messages, "RoomID": roomID, "NextPage": page + 1})

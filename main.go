@@ -26,7 +26,8 @@ func main() {
 	// Create fiber app
 	engine := html.New("./views", ".html")
 	app := fiber.New(fiber.Config{
-		Views: engine,
+		Views:             engine,
+		PassLocalsToViews: true,
 	})
 
 	// Global Middleware
