@@ -13,6 +13,7 @@ VALUES
 CREATE TABLE room_users (
     room_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
+    admin INTEGER DEFAULT 0,
     FOREIGN KEY (room_id) REFERENCES rooms(room_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     PRIMARY KEY (room_id, user_id)
@@ -29,7 +30,7 @@ from
 CREATE TABLE messages (
     message_id INTEGER PRIMARY KEY AUTOINCREMENT,
     room_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
+    user_id INTEGER,
     content TEXT NOT NULL,
     reply_to INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

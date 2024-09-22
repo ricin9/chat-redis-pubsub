@@ -6,8 +6,7 @@
     <title>{{or .Title "Chat app with fiber"}}</title>
     <script src="/vendor/htmx@2.0.2.min.js"></script>
     <script src="/vendor/htmx-ws@2.0.1.js"></script>
-    <script src="/js/main.js" defer="true"></script>
-
+    <script src="/js/main.js" defer></script>
     <link rel="stylesheet" href="/css/output.css" />
     {{template "partials/favicons"}}
   </head>
@@ -50,8 +49,8 @@
             .RoomID}}
             <script>
               document
-                .getElementById("room-{{.RoomID}}")
-                .classList.add("selected-room");
+                .getElementById('room-{{.RoomID}}')
+                .classList.add('selected-room')
             </script>
             {{end}}
           </ul>
@@ -87,5 +86,8 @@
         {{template "partials/create-room-form" .}}
       </div>
     </div>
+
+    <!-- Room info modal -->
+    <div id="room-info-modal" class="hidden"></div>
   </body>
 </html>

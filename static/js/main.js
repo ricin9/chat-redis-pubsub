@@ -1,170 +1,189 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const currentRoomId = location.pathname.split("/").pop();
+document.addEventListener('DOMContentLoaded', function () {
+  const currentRoomId = location.pathname.split('/').pop()
   if (!currentRoomId || Number.isNaN(Number(currentRoomId))) {
-    return;
+    return
   }
 
-  const messages = document.getElementById(`room-${currentRoomId}-messages`);
+  const messages = document.getElementById(`room-${currentRoomId}-messages`)
   if (!messages) {
-    return;
+    return
   }
 
-  messages.scrollTo(0, messages.scrollHeight);
-});
-document.addEventListener("htmx:wsAfterMessage", function (event) {
-  if (!event.detail.message.includes("data-room-id")) {
-    return;
+  messages.scrollTo(0, messages.scrollHeight)
+})
+document.addEventListener('htmx:wsAfterMessage', function (event) {
+  if (!event.detail.message.includes('data-room-id')) {
+    return
   }
 
-  const currentRoomId = location.pathname.split("/").pop();
+  const currentRoomId = location.pathname.split('/').pop()
   if (!currentRoomId || Number.isNaN(Number(currentRoomId))) {
-    return;
+    return
   }
 
-  const wsElt = document.createElement("div");
-  wsElt.innerHTML = event.detail.message;
-  const IncomingMessageRoomId = wsElt.firstChild.getAttribute("data-room-id");
+  const wsElt = document.createElement('div')
+  wsElt.innerHTML = event.detail.message
+  const IncomingMessageRoomId = wsElt.firstChild.getAttribute('data-room-id')
 
   if (currentRoomId !== IncomingMessageRoomId) {
-    incrementUnread(IncomingMessageRoomId);
-    return;
+    incrementUnread(IncomingMessageRoomId)
+    return
   }
 
   // scroll messages to bottom
-  const messages = document.getElementById(`room-${currentRoomId}-messages`);
+  const messages = document.getElementById(`room-${currentRoomId}-messages`)
   if (!messages) {
-    return;
+    return
   }
   // Check if user is near the bottom
   const isAtBottom =
-    messages.scrollHeight - messages.scrollTop <= messages.clientHeight + 100;
+    messages.scrollHeight - messages.scrollTop <= messages.clientHeight + 130
 
   if (isAtBottom) {
-    messages.scrollTo(0, messages.scrollHeight);
+    messages.scrollTo(0, messages.scrollHeight)
     if (!document.hasFocus()) {
-      incrementUnread(currentRoomId);
+      incrementUnread(currentRoomId)
     }
   } else {
-    incrementUnread(currentRoomId);
+    incrementUnread(currentRoomId)
   }
 
-  const room = document.getElementById(`room-${currentRoomId}`);
-  const roomList = document.getElementById("room-list");
+  const room = document.getElementById(`room-${currentRoomId}`)
+  const roomList = document.getElementById('room-list')
 
   if (room) {
-    roomList.prepend(room);
+    roomList.prepend(room)
   }
-});
+})
 
 function incrementUnread(roomId) {
-  const room = document.getElementById(`room-${roomId}`);
+  const room = document.getElementById(`room-${roomId}`)
   if (!room) {
-    return;
+    return
   }
 
-  const unread = room.children[0].children[1];
+  const unread = room.children[0].children[1]
   if (!unread) {
-    return;
+    return
   }
 
-  const count = parseInt(unread.innerText) || 0;
-  unread.innerText = count + 1;
+  const count = parseInt(unread.innerText) || 0
+  unread.innerText = count + 1
 
-  const countInTitle = document.title.split(" ")[0];
+  const countInTitle = document.title.split(' ')[0]
   if (
-    countInTitle[0] === "(" &&
-    countInTitle[countInTitle.length - 1] === ")"
+    countInTitle[0] === '(' &&
+    countInTitle[countInTitle.length - 1] === ')'
   ) {
-    const count = parseInt(countInTitle.slice(1, countInTitle.length - 1)) || 0;
+    const count = parseInt(countInTitle.slice(1, countInTitle.length - 1)) || 0
     document.title = `(${count + 1}) ${document.title
-      .split(" ")
+      .split(' ')
       .slice(1)
-      .join(" ")}`;
+      .join(' ')}`
   } else {
-    document.title = `(1) ${document.title}`;
+    document.title = `(1) ${document.title}`
   }
 }
 
 function resetUnread(roomId) {
   if (!document.hasFocus()) {
-    return;
+    return
   }
-  const room = document.getElementById(`room-${roomId}`);
+  const room = document.getElementById(`room-${roomId}`)
   if (!room) {
-    return;
+    return
   }
 
-  const unread = room.children[0].children[1];
+  const unread = room.children[0].children[1]
   if (!unread) {
-    return;
+    return
   }
 
-  const currentCount = parseInt(unread.innerText) || 0;
+  const currentCount = parseInt(unread.innerText) || 0
   if (currentCount === 0) {
-    return;
+    return
   }
 
-  unread.innerText = "";
+  unread.innerText = ''
 
-  const countInTitle = document.title.split(" ")[0];
+  const countInTitle = document.title.split(' ')[0]
   if (
-    countInTitle[0] !== "(" ||
-    countInTitle[countInTitle.length - 1] !== ")"
+    countInTitle[0] !== '(' ||
+    countInTitle[countInTitle.length - 1] !== ')'
   ) {
-    return;
+    return
   }
 
-  const count = parseInt(countInTitle.slice(1, countInTitle.length - 1)) || 0;
-  const newCount = count - currentCount;
+  const count = parseInt(countInTitle.slice(1, countInTitle.length - 1)) || 0
+  const newCount = count - currentCount
 
   if (newCount <= 0) {
-    document.title = document.title.split(" ").slice(1).join(" ");
-    return;
+    document.title = document.title.split(' ').slice(1).join(' ')
+    return
   }
 
   document.title = `(${newCount}) ${document.title
-    .split(" ")
+    .split(' ')
     .slice(1)
-    .join(" ")}`;
+    .join(' ')}`
 }
 
-document.addEventListener("focus", function (event) {
+document.addEventListener('focus', function (event) {
   if (!document.hasFocus()) {
-    return;
+    return
   }
-  const currentRoomId = location.pathname.split("/").pop();
+  const currentRoomId = location.pathname.split('/').pop()
   if (!currentRoomId || Number.isNaN(Number(currentRoomId))) {
-    return;
+    return
   }
 
-  const messages = document.getElementById(`room-${currentRoomId}-messages`);
+  const messages = document.getElementById(`room-${currentRoomId}-messages`)
   if (!messages) {
-    return;
+    return
   }
 
   if (messages.scrollHeight - messages.scrollTop === messages.clientHeight) {
-    resetUnread(currentRoomId);
+    resetUnread(currentRoomId)
   }
-});
+})
 
-const sidebar = document.getElementById("sidebar");
-const createRoomBtn = document.getElementById("createRoomBtn");
-const createRoomModal = document.getElementById("createRoomModal");
+const sidebar = document.getElementById('sidebar')
+const createRoomBtn = document.getElementById('createRoomBtn')
+const createRoomModal = document.getElementById('createRoomModal')
 
 function closeSidebar() {
-  sidebar.classList.add("-translate-x-full");
+  sidebar.classList.add('-translate-x-full')
 }
 
 function openSidebar() {
-  sidebar.classList.remove("-translate-x-full");
+  sidebar.classList.remove('-translate-x-full')
 }
-createRoomBtn.addEventListener("click", () => {
-  closeSidebar();
-  createRoomModal.classList.remove("hidden");
-  createRoomModal.classList.add("flex");
-});
+createRoomBtn.addEventListener('click', () => {
+  closeSidebar()
+  createRoomModal.classList.remove('hidden')
+  createRoomModal.classList.add('flex')
+})
 
 function closeCreateRoomModal() {
-  createRoomModal.classList.add("hidden");
-  createRoomModal.classList.remove("flex");
+  createRoomModal.classList.add('hidden')
+  createRoomModal.classList.remove('flex')
+}
+
+function closeRoomInfo() {
+  const roomInfoModal = document.getElementById('room-info-modal')
+  roomInfoModal.classList.add('hidden')
+  roomInfoModal.classList.remove('flex')
+}
+
+function toggleRoomMemberActionDropdown(elem) {
+  const dropdown = elem.nextElementSibling
+  const allDropdowns = document.querySelectorAll('[id^="dropdown"]')
+
+  allDropdowns.forEach((dd) => {
+    if (dd.id !== dropdown.id) {
+      dd.classList.add('hidden')
+    }
+  })
+
+  dropdown.classList.toggle('hidden')
 }

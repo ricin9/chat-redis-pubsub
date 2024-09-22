@@ -24,6 +24,23 @@
       </button>
       <h2 class="text-xl font-semibold"># {{.RoomName}}</h2>
     </div>
+    <div class="flex items-center space-x-2">
+      <button
+        id="roomInfoBtn"
+        hx-get="/rooms/{{.RoomID}}/info"
+        hx-target="#room-info-modal"
+        hx-swap="outerHTML"
+        class="bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600 transition duration-150 ease-in-out"
+      >
+        Room Info
+      </button>
+      <button
+        id="leaveRoomBtn"
+        class="bg-red-500 text-white px-3 py-1 rounded-full hover:bg-red-600 transition duration-150 ease-in-out"
+      >
+        Leave Room
+      </button>
+    </div>
   </header>
 
   <!-- Chat Area -->

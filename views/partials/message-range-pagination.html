@@ -13,12 +13,30 @@
   <div>
     <p class="font-medium text-right">You</p>
     <p class="bg-blue-600 text-white p-2 rounded-lg shadow">{{.Content}}</p>
+    <div class="mt-1 flex items-center space-x-2 justify-end">
+      <button class="text-sm text-blue-500 hover:underline">Reply</button>
+    </div>
   </div>
   <img
     src="https://via.placeholder.com/40"
     alt="User Avatar"
     class="w-10 h-10 rounded-full"
   />
+</div>
+{{else if not .UserID}}
+<div
+  class="flex items-start justify-center space-x-2 mt-4"
+  {{if
+  not
+  $i}}
+  hx-get="/rooms/{{$.RoomID}}/messages?page={{or $.NextPage 2}}"
+  hx-trigger="intersect threshold:0.1 once root:#room-{{$.RoomID}}-messages delay:100ms"
+  hx-swap="beforebegin"
+  {{end}}
+>
+  <div>
+    <p class="bg-white p-2 rounded-lg shadow">{{.Content}}</p>
+  </div>
 </div>
 {{else}}
 <div
@@ -39,6 +57,9 @@
   <div>
     <p class="font-medium">{{.Username}}</p>
     <p class="bg-white p-2 rounded-lg shadow">{{.Content}}</p>
+    <div class="mt-1 flex items-center space-x-2">
+      <button class="text-sm text-blue-500 hover:underline">Reply</button>
+    </div>
   </div>
 </div>
 {{end}} {{end}}

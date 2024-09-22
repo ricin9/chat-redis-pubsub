@@ -3,34 +3,18 @@ package handlers
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"ricin9/fiber-chat/config"
+	"ricin9/fiber-chat/services"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 )
-
-type PublishMessagePayload struct {
-	ID        int       `json:"id"`
-	UserID    int       `json:"user_id"`
-	RoomID    int       `json:"room_id"`
-	Username  string    `json:"username"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-type IncomingMessage struct {
-	Content string `json:"content"`
-	RoomID  int    `json:"room_id"`
-	ReplyTo int    `json:"reply_to"`
-}
 
 type RoomChangePayload struct {
 	ID   int    `json:"room_id"`
@@ -77,6 +61,7 @@ func handleRoomChanges(c *websocket.Conn, uid int, writeMu *sync.Mutex, done cha
 				continue
 			}
 
+			fmt.Println("room change subscription", payload)
 			if payload.Type == RoomChangeJoin {
 
 				tmpl, err := template.ParseFiles("views/partials/room.html")
@@ -123,7 +108,7 @@ func handeleSubscription(c *websocket.Conn, rooms []string, writeMu *sync.Mutex,
 			return
 		case msg := <-ch:
 
-			var payload PublishMessagePayload
+			var payload services.PublishMessagePayload
 			err := json.Unmarshal([]byte(msg.Payload), &payload)
 			if err != nil {
 				fmt.Println("error unmarshalling subscribed message", err)
@@ -133,7 +118,8 @@ func handeleSubscription(c *websocket.Conn, rooms []string, writeMu *sync.Mutex,
 			tmpl, err := template.ParseFiles("views/partials/message-with-room-reorder.html",
 				"views/partials/message.html",
 				"views/partials/message-right.html",
-				"views/partials/message-left.html")
+				"views/partials/message-left.html",
+				"views/partials/message-middle.html")
 			if err != nil {
 				fmt.Println("could not find template file", err)
 				break
@@ -150,7 +136,6 @@ func handeleSubscription(c *websocket.Conn, rooms []string, writeMu *sync.Mutex,
 				"uid":       c.Locals("uid"),
 			})
 
-			fmt.Println("message user id", payload.UserID, "current user id", c.Locals("uid"))
 			if err != nil {
 				fmt.Println("error executing template", err)
 				break
@@ -173,7 +158,7 @@ func handleIncoming(c *websocket.Conn, uid int, done chan struct{}) {
 	defer close(done)
 
 	for {
-		var msg IncomingMessage
+		var msg services.WsIncomingMessage
 		if err := c.ReadJSON(&msg); err != nil {
 			log.Println("invalid incoming message format", err)
 			break
@@ -189,45 +174,15 @@ func handleIncoming(c *websocket.Conn, uid int, done chan struct{}) {
 			continue
 		}
 
-		messageId, err := persistMessage(uid, msg)
+		err := services.PersistPublishMessage(uid, msg)
 		if err != nil {
 			log.Println("error persisting message", err)
 			continue
 		}
 
-		username := getUsername(uid)
-		outgoing := PublishMessagePayload{
-			ID:        messageId,
-			UserID:    uid,
-			RoomID:    msg.RoomID,
-			Username:  username,
-			Content:   msg.Content,
-			CreatedAt: time.Now(),
-		}
-
-		payload, err := json.Marshal(outgoing)
-		if err != nil {
-			fmt.Println("error marshalling message", err)
-			continue
-		}
-
-		rdb := config.RedisClient
-		rdb.Publish(context.Background(), strconv.Itoa(msg.RoomID), payload)
 	}
 }
 
-func getUsername(uid int) string {
-	db := config.Db
-
-	var username string
-	err := db.QueryRow("SELECT username FROM users WHERE user_id = ?", uid).Scan(&username)
-	if err != nil {
-		log.Println("error getting username", err)
-		return "unknown"
-	}
-
-	return username
-}
 func userRooms(uid int) []string {
 	db := config.Db
 
@@ -273,24 +228,4 @@ func messageBelongsToRoom(messageID int, roomID int) bool {
 	}
 
 	return true
-}
-func persistMessage(uid int, msg IncomingMessage) (messageId int, err error) {
-	db := config.Db
-
-	var replyto sql.NullInt64
-	if msg.ReplyTo != 0 {
-		replyto = sql.NullInt64{Int64: int64(msg.ReplyTo), Valid: true}
-	}
-
-	result, err := db.Exec("INSERT INTO messages (content, room_id, user_id, reply_to) VALUES (?, ?, ?, ?)", msg.Content, msg.RoomID, uid, replyto)
-	if err != nil {
-		return 0, err
-	}
-
-	messageID, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(messageID), nil
 }
