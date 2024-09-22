@@ -1,12 +1,14 @@
-<form hx-post="/login">
+<form hx-post="/login" class="space-y-4">
   <p id="message" class="text-yellow-500 text-sm mt-1">{{.Message}}</p>
-  <div class="mb-4">
-    <label for="username" class="block mb-2">Username</label>
+  <div>
+    <label for="username" class="block text-sm font-medium text-gray-700"
+      >Username</label
+    >
     <input
       type="text"
       id="username"
       name="username"
-      class="w-full p-2 border rounded"
+      class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
       required
       value="{{.User.Username}}"
       oninput="this.nextElementSibling.textContent = ''"
@@ -15,13 +17,15 @@
       {{.Errors.Username}}
     </p>
   </div>
-  <div class="mb-4">
-    <label for="password" class="block mb-2">Password</label>
+  <div>
+    <label for="username" class="block text-sm font-medium text-gray-700"
+      >Password</label
+    >
     <input
       type="password"
       id="password"
       name="password"
-      class="w-full p-2 border rounded"
+      class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
       required
       oninput="this.nextElementSibling.textContent = ''"
     />
@@ -31,8 +35,8 @@
   </div>
   <button
     type="submit"
-    class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+    class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
   >
-    Login
+    Sign in
   </button>
 </form>

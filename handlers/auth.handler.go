@@ -71,7 +71,7 @@ func Signup(c *fiber.Ctx) error {
 		return c.Format("failed to notify users of promotion")
 	}
 
-	c.Set("HX-Location", "/")
+	c.Set("HX-Redirect", "/")
 	return c.SendStatus(201)
 }
 
@@ -107,7 +107,7 @@ func Login(c *fiber.Ctx) error {
 		return c.Format("User created but couldn't create a session")
 	}
 
-	c.Set("HX-Location", "/")
+	c.Set("HX-Redirect", "/")
 	return c.SendStatus(200)
 }
 
