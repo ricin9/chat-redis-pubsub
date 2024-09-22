@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"fmt"
+	"log"
 	"ricin9/fiber-chat/config"
+	"ricin9/fiber-chat/services"
 	"ricin9/fiber-chat/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -50,7 +53,6 @@ func Signup(c *fiber.Ctx) error {
 	}
 
 	// add to general chat
-	// TODO: add and fix trigger migration, it errors now with sql-migrate
 	go func() {
 		_, err := db.Exec("INSERT INTO room_users (room_id, user_id) VALUES (?, ?)", 1, uid)
 		if err != nil {
@@ -60,6 +62,13 @@ func Signup(c *fiber.Ctx) error {
 	err = utils.CreateSession(c, int(uid))
 	if err != nil {
 		return c.Format("User created but couldn't create a session")
+	}
+
+	message := fmt.Sprintf("New user has joined, welcome %s", user.Username)
+	err = services.PersistPublishMessage(0, services.WsIncomingMessage{RoomID: 1, Content: message})
+	if err != nil {
+		log.Println(err)
+		return c.Format("failed to notify users of promotion")
 	}
 
 	c.Set("HX-Location", "/")
