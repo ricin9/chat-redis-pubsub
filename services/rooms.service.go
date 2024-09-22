@@ -66,6 +66,17 @@ func GetRoomMembers(roomID int) (members []Member, err error) {
 	return members, nil
 }
 
+func GetRoom(roomId int) (room Room, err error) {
+	db := config.Db
+
+	err = db.QueryRow("SELECT room_id, name FROM rooms WHERE room_id = ?", roomId).Scan(&room.ID, &room.Name)
+	if err != nil {
+		return Room{}, err
+	}
+
+	return room, nil
+}
+
 func GetUserIds(rows *sql.Rows) (ids []int, err error) {
 	for rows.Next() {
 		var id int

@@ -1,0 +1,5 @@
+{{template "partials/room-add-member-form" .Form}}
+
+<ul hx-swap-oob="beforeend:#member-list">
+  {{template "partials/room-info-member-li" .Member}}
+</ul>

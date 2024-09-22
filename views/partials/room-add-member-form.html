@@ -1,15 +1,22 @@
-<form class="flex space-x-2" hx-post="/rooms/{{.RoomID}}/members">
-  <input
-    type="text"
-    id="username"
-    placeholder="Username"
-    name="username"
-    class="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-  />
-  <button
-    type="submit"
-    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-150 ease-in-out"
-  >
-    Add
-  </button>
+<form hx-post="/rooms/{{.RoomID}}/members">
+  <p id="message" class="text-yellow-500 text-sm mt-1">{{.Message}}</p>
+  <div class="flex space-x-2">
+    <input
+      id="name"
+      type="text"
+      name="username"
+      required
+      value="{{.Username}}"
+      placeholder="My wonderful room"
+      oninput="this.parentElement.nextElementSibling.textContent = ''"
+      class="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <button
+      type="submit"
+      class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-150 ease-in-out"
+    >
+      Add
+    </button>
+  </div>
+  <p class="text-red-500 text-sm mt-1">{{.Error}}</p>
 </form>

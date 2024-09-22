@@ -1,10 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"ricin9/fiber-chat/config"
 	"ricin9/fiber-chat/services"
+	"ricin9/fiber-chat/utils"
+	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -12,27 +16,79 @@ import (
 func AddRoomMember(c *fiber.Ctx) error {
 	uid := c.Locals("uid").(int)
 	roomID, err := c.ParamsInt("id")
+
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
+	memberUsername := strings.TrimSpace(c.FormValue("username"))
+
+	err = config.Validate.Var(memberUsername, "required,min=3,max=32")
+	if err != nil {
+		errmsg := "username" + utils.FormatErrors(err)[""]
+		return c.Render("partials/room-add-member-form", fiber.Map{"Error": errmsg, "RoomID": roomID, "Username": memberUsername})
+	}
+
 	db := config.Db
 
-	var exists bool
-	err = db.QueryRow("select 1 from room_users where room_id = ? and user_id = ? and admin = 1 and 1 = 0",
-		roomID, uid).Scan(&exists)
+	var username string
+	err = db.QueryRow("select username from room_users join users using (user_id) where room_id = ? and user_id = ? and admin = 1",
+		roomID, uid).Scan(&username)
 
-	if err != nil || !exists {
+	if err != nil {
 		return c.Format("you are not an admin of this room")
 	}
 
-	// TODO
+	var memberId int
+	err = db.QueryRow("select user_id from users where username = ?", memberUsername).Scan(&memberId)
+	if err != nil {
+		msg := fmt.Sprintf("user %s does not exist", memberUsername)
+		return c.Render("partials/room-add-member-form", fiber.Map{"Error": msg, "RoomID": roomID, "Username": memberUsername})
+	}
 
-	// add user to room
-	// publish event to room
-	// publish event to user
+	var exists bool
+	err = db.QueryRow("select 1 from room_users join users using (user_id) where room_id = ? and user_id = ?",
+		roomID, memberId).Scan(&exists)
 
-	return c.Format("cool beans")
+	if err == nil {
+		msg := fmt.Sprintf("user %s is already a member of this room", memberUsername)
+		return c.Render("partials/room-add-member-form", fiber.Map{"Error": msg, "RoomID": roomID, "Username": memberUsername})
+	}
+
+	_, err = db.Exec("insert into room_users (room_id, user_id) values (?, ?)", roomID, memberId)
+
+	if err != nil {
+		log.Println(err)
+		return c.Format("Unknown Error adding user to room")
+	}
+
+	room, err := services.GetRoom(roomID)
+	if err != nil {
+		log.Println(err)
+		c.Format("added member, but failed to notify users of new member")
+	}
+
+	// notify user of room change
+	rdb := config.RedisClient
+	roomChangePayload := RoomChangePayload{ID: int(roomID), Name: room.Name, Type: RoomChangeJoin}
+	roomChangeJson, err := json.Marshal(roomChangePayload)
+	if err != nil {
+		log.Println(err)
+		return c.Format("error notifying users of new room")
+	}
+
+	rdb.Publish(c.Context(), "user:"+strconv.Itoa(memberId), roomChangeJson)
+
+	message := fmt.Sprintf("%s has added %s to the room", username, memberUsername)
+	err = services.PersistPublishMessage(0, services.WsIncomingMessage{RoomID: roomID, Content: message})
+	if err != nil {
+		log.Println(err)
+		return c.Format("failed to notify users of new member addition")
+	}
+
+	return c.Render("partials/room-add-member-sucess", fiber.Map{
+		"Form":   fiber.Map{"Sucess": "member added successfully", "RoomID": roomID},
+		"Member": fiber.Map{"Username": memberUsername, "Admin": false, "RoomID": roomID, "ID": memberId}})
 }
 
 func KickMember(c *fiber.Ctx) error {
@@ -73,7 +129,7 @@ func KickMember(c *fiber.Ctx) error {
 		return c.Format("failed to notify users of kicking")
 	}
 
-	return c.SendStatus(204)
+	return c.SendStatus(200)
 }
 
 func PromoteMember(c *fiber.Ctx) error {

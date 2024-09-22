@@ -36,7 +36,6 @@ func Setup(app *fiber.App) {
 	app.Get("/rooms/:id/info", middleware.Authenticate, GetRoomInfo)
 
 	app.Post("/rooms/:id/members", middleware.Authenticate, AddRoomMember)
-
 	app.Post("/rooms/:roomId/members/:userId/kick", middleware.Authenticate, KickMember)
 	app.Post("/rooms/:roomId/members/:userId/promote", middleware.Authenticate, PromoteMember)
 	app.Post("/rooms/:roomId/members/:userId/demote", middleware.Authenticate, DemoteMember)
