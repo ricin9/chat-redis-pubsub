@@ -2,9 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer components {
-    .selected-room {
-        @apply bg-blue-100 text-blue-600 font-medium 
+  .selected-room {
+    @apply bg-blue-100 text-blue-600 font-medium;
+  }
+
+  /* unstyled */
+  .avatar {
+    @apply relative inline-flex;
+    & > div {
+      @apply block aspect-square overflow-hidden;
     }
+    img {
+      @apply h-full w-full object-cover;
+    }
+    &.placeholder {
+      & > div {
+        @apply flex items-center justify-center;
+      }
+    }
+  }
 }

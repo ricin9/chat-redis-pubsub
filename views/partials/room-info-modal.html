@@ -72,10 +72,12 @@
           {{end}}
         </ul>
       </div>
+      {{if $.CurrentIsAdmin}}
       <div>
         <h3 class="text-lg font-semibold">Add Member:</h3>
         {{template "partials/room-add-member-form" .}}
       </div>
+      {{end}}
       <div class="flex justify-end">
         <button
           id="closeRoomInfo"
