@@ -62,7 +62,7 @@ func AddRoomMember(c *fiber.Ctx) error {
 		return c.Format("Unknown Error adding user to room")
 	}
 
-	room, err := services.GetRoom(c.Context(), roomID)
+	room, err := services.GetRoomById(c.Context(), roomID)
 	if err != nil {
 		log.Println(err)
 		c.Format("added member, but failed to notify users of new member")
@@ -70,8 +70,10 @@ func AddRoomMember(c *fiber.Ctx) error {
 
 	// notify user of room change
 	rdb := config.RedisClient
-	roomChangePayload := RoomChangePayload{ID: int(roomID), Name: room.Name, Type: RoomChangeJoin}
-	roomChangeJson, err := json.Marshal(roomChangePayload)
+	roomJoinPayload := PSJoinRoom{PSBase: PSBase{Type: CJoinRoom},
+		RoomID: int(roomID), Name: room.Name}
+
+	roomChangeJson, err := json.Marshal(roomJoinPayload)
 	if err != nil {
 		log.Println(err)
 		return c.Format("error notifying users of new room")
@@ -124,8 +126,10 @@ func KickMember(c *fiber.Ctx) error {
 
 	// notify user of room change
 	rdb := config.RedisClient
-	roomChangePayload := RoomChangePayload{ID: int(roomID), Name: "", Type: RoomChangeLeave}
-	roomChangeJson, err := json.Marshal(roomChangePayload)
+	roomKickedPayload := PSKickedFromRoom{PSBase: PSBase{Type: CKickedFromRoom},
+		RoomID: int(roomID)}
+
+	roomChangeJson, err := json.Marshal(roomKickedPayload)
 	if err != nil {
 		log.Println(err)
 		return c.Format("error notifying users of new room")

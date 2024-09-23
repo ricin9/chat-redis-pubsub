@@ -108,7 +108,7 @@ func CreateRoom(c *fiber.Ctx) error {
 		return c.Format("Error adding users to room")
 	}
 
-	userIds, err := services.GetUserIds(newMembers)
+	userIds, err := utils.GetUserIds(newMembers)
 	if err != nil {
 		log.Println(err)
 		return c.Format("error adding users")
@@ -116,8 +116,10 @@ func CreateRoom(c *fiber.Ctx) error {
 
 	// notify users
 	rdb := config.RedisClient
-	roomChangePayload := RoomChangePayload{ID: int(roomID), Name: room.Name, Type: RoomChangeJoin}
-	roomChangeJson, err := json.Marshal(roomChangePayload)
+
+	roomJoinPayload := PSJoinRoom{PSBase: PSBase{Type: CJoinRoom},
+		RoomID: int(roomID), Name: room.Name}
+	roomChangeJson, err := json.Marshal(roomJoinPayload)
 	if err != nil {
 		log.Println(err)
 		return c.Format("error notifying users of new room")
@@ -194,7 +196,7 @@ func LeaveRoom(c *fiber.Ctx) error {
 
 	// notify user of room change
 	rdb := config.RedisClient
-	roomChangePayload := RoomChangePayload{ID: int(roomID), Name: "", Type: RoomChangeLeave}
+	roomChangePayload := PSLeaveRoom{PSBase{Type: CLeaveRoom}, roomID}
 	roomChangeJson, err := json.Marshal(roomChangePayload)
 	if err != nil {
 		log.Println(err)

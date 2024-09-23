@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"database/sql"
+	"log"
 	"ricin9/fiber-chat/config"
+	"strconv"
 )
 
 type Room struct {
@@ -67,7 +69,7 @@ func GetRoomMembers(roomID int) (members []Member, err error) {
 	return members, nil
 }
 
-func GetRoom(ctx context.Context, roomId int) (room Room, err error) {
+func GetRoomById(ctx context.Context, roomId int) (room Room, err error) {
 	db := config.Db
 
 	err = db.QueryRowContext(ctx, "SELECT room_id, name FROM rooms WHERE room_id = ?", roomId).Scan(&room.ID, &room.Name)
@@ -78,15 +80,51 @@ func GetRoom(ctx context.Context, roomId int) (room Room, err error) {
 	return room, nil
 }
 
-func GetUserIds(rows *sql.Rows) (ids []int, err error) {
+func RoomIdsForUser(uid int) []string {
+	db := config.Db
+
+	rows, err := db.Query("SELECT room_id FROM room_users WHERE user_id = ?", uid)
+	if err != nil {
+		log.Println("[/ Rooms] err: ", err)
+		return nil
+	}
+	defer rows.Close()
+
+	var rooms []string
 	for rows.Next() {
-		var id int
-		err := rows.Scan(&id)
+		var roomID int
+		err := rows.Scan(&roomID)
 		if err != nil {
-			return nil, err
+			log.Println("error scanning chat rooms")
+			return nil
 		}
 
-		ids = append(ids, id)
+		rooms = append(rooms, strconv.Itoa(roomID))
 	}
-	return ids, nil
+
+	return rooms
+}
+
+func RoomHasUser(roomID int, uid int) bool {
+	db := config.Db
+
+	var exists bool
+	err := db.QueryRowContext(context.Background(), "select 1 from room_users where room_id = ? and user_id = ?", roomID, uid).Scan(&exists)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func RoomHasMessage(roomID int, messageID int) bool {
+	db := config.Db
+
+	var exists bool
+	err := db.QueryRowContext(context.Background(), "select 1 from messages where message_id = ? and room_id = ?", messageID, roomID).Scan(&exists)
+	if err != nil {
+		return false
+	}
+
+	return true
 }

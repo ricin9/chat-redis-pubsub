@@ -85,14 +85,21 @@ func PersistPublishMessage(ctx context.Context, uid int, msg WsIncomingMessage) 
 		username = GetUsername(ctx, uid)
 	}
 
-	outgoing := PublishMessagePayload{
-		ID:        int(messageID),
-		UserID:    uid,
-		RoomID:    msg.RoomID,
-		Username:  username,
-		Content:   msg.Content,
-		CreatedAt: time.Now(),
+	// PSMessageBroadcast, can't import it directly cause dependency circle and i dont want IoC refactor now
+	type yeah struct {
+		Type int `json:"type"`
+		PublishMessagePayload
 	}
+	outgoing := yeah{
+		Type: 1,
+		PublishMessagePayload: PublishMessagePayload{
+			ID:        int(messageID),
+			UserID:    uid,
+			RoomID:    msg.RoomID,
+			Username:  username,
+			Content:   msg.Content,
+			CreatedAt: time.Now(),
+		}}
 
 	payload, err := json.Marshal(outgoing)
 	if err != nil {
