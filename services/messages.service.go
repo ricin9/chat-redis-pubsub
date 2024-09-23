@@ -34,10 +34,10 @@ type Message struct {
 	Username  string
 }
 
-func GetMessages(uid int, roomID int, page int) (messages []Message, err error) {
+func GetMessages(ctx context.Context, uid int, roomID int, page int) (messages []Message, err error) {
 	db := config.Db
 
-	rows, err := db.Query("SELECT m.message_id, m.content, m.created_at, ifnull(u.user_id, 0), ifnull(u.username, '') FROM messages m LEFT JOIN users u ON m.user_id = u.user_id WHERE m.room_id = ? ORDER BY m.message_id DESC limit 50 offset ?", roomID, (page-1)*50)
+	rows, err := db.QueryContext(ctx, "SELECT m.message_id, m.content, m.created_at, ifnull(u.user_id, 0), ifnull(u.username, '') FROM messages m LEFT JOIN users u ON m.user_id = u.user_id WHERE m.room_id = ? ORDER BY m.message_id DESC limit 50 offset ?", roomID, (page-1)*50)
 
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func GetMessages(uid int, roomID int, page int) (messages []Message, err error) 
 	return messages, nil
 }
 
-func PersistPublishMessage(uid int, msg WsIncomingMessage) (err error) {
+func PersistPublishMessage(ctx context.Context, uid int, msg WsIncomingMessage) (err error) {
 	db := config.Db
 
 	var replyto sql.NullInt64
@@ -82,7 +82,7 @@ func PersistPublishMessage(uid int, msg WsIncomingMessage) (err error) {
 
 	username := ""
 	if uid != 0 {
-		username = GetUsername(uid)
+		username = GetUsername(ctx, uid)
 	}
 
 	outgoing := PublishMessagePayload{
@@ -101,6 +101,6 @@ func PersistPublishMessage(uid int, msg WsIncomingMessage) (err error) {
 	}
 
 	rdb := config.RedisClient
-	rdb.Publish(context.Background(), strconv.Itoa(msg.RoomID), payload)
+	rdb.Publish(ctx, strconv.Itoa(msg.RoomID), payload)
 	return nil
 }

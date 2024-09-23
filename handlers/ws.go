@@ -33,14 +33,17 @@ func Websocket(c *websocket.Conn) {
 
 	writeMu := sync.Mutex{}
 
+	unsub := make(chan string, 10)
+	newsub := make(chan string, 10)
+
 	done := make(chan struct{})
-	go handeleSubscription(c, rooms, &writeMu, done)
-	go handleRoomChanges(c, uid, &writeMu, done)
+	go handeleSubscription(c, rooms, &writeMu, done, unsub, newsub)
+	go handleRoomChanges(c, uid, &writeMu, done, unsub, newsub)
 	handleIncoming(c, uid, done)
 
 }
 
-func handleRoomChanges(c *websocket.Conn, uid int, writeMu *sync.Mutex, done chan struct{}) {
+func handleRoomChanges(c *websocket.Conn, uid int, writeMu *sync.Mutex, done chan struct{}, unsub, newsub chan string) {
 	defer c.Close()
 
 	rdb := config.RedisClient
@@ -61,9 +64,8 @@ func handleRoomChanges(c *websocket.Conn, uid int, writeMu *sync.Mutex, done cha
 				continue
 			}
 
-			fmt.Println("room change subscription", payload)
 			if payload.Type == RoomChangeJoin {
-
+				newsub <- strconv.Itoa(payload.ID)
 				tmpl, err := template.ParseFiles("views/partials/room.html")
 				if err != nil {
 					fmt.Println("could not find template file", err)
@@ -87,13 +89,31 @@ func handleRoomChanges(c *websocket.Conn, uid int, writeMu *sync.Mutex, done cha
 				}
 				writeMu.Unlock()
 
+			} else if payload.Type == RoomChangeLeave {
+				unsub <- strconv.Itoa(payload.ID)
+
+				// refactor to template later
+				html := fmt.Sprintf(`<ul id="room-list" hx-swap-oob="delete:#room-%d"></ul>
+				<div class="flex items-start justify-center space-x-2 mt-4" hx-swap-oob="outerHTML:#room-%d-messages">
+  				<div>
+    				<p class="bg-white p-2 rounded-lg shadow text-center">You have been kicked from this room</p>
+  				</div>
+				</div>
+				<div hx-swap-oob='delete:#message-input:has(form[hx-vals$=":%d}"])'></div>`,
+					payload.ID, payload.ID, payload.ID)
+
+				writeMu.Lock()
+				if err := c.WriteMessage(1, []byte(html)); err != nil {
+					log.Fatalln("write error: ", err)
+				}
+				writeMu.Unlock()
 			}
 		}
 	}
 
 }
 
-func handeleSubscription(c *websocket.Conn, rooms []string, writeMu *sync.Mutex, done chan struct{}) {
+func handeleSubscription(c *websocket.Conn, rooms []string, writeMu *sync.Mutex, done chan struct{}, unsub, newsub chan string) {
 	defer c.Close()
 
 	rdb := config.RedisClient
@@ -106,6 +126,10 @@ func handeleSubscription(c *websocket.Conn, rooms []string, writeMu *sync.Mutex,
 		select {
 		case <-done:
 			return
+		case room := <-unsub:
+			pubsub.Unsubscribe(context.Background(), room)
+		case room := <-newsub:
+			pubsub.Subscribe(context.Background(), room)
 		case msg := <-ch:
 
 			var payload services.PublishMessagePayload
@@ -166,6 +190,7 @@ func handleIncoming(c *websocket.Conn, uid int, done chan struct{}) {
 
 		if !userBelongsTo(uid, msg.RoomID) {
 			log.Println("user does not belong to room")
+
 			continue
 		}
 
@@ -174,7 +199,7 @@ func handleIncoming(c *websocket.Conn, uid int, done chan struct{}) {
 			continue
 		}
 
-		err := services.PersistPublishMessage(uid, msg)
+		err := services.PersistPublishMessage(context.Background(), uid, msg)
 		if err != nil {
 			log.Println("error persisting message", err)
 			continue
@@ -211,7 +236,8 @@ func userRooms(uid int) []string {
 func userBelongsTo(uid int, roomID int) bool {
 	db := config.Db
 
-	err := db.QueryRow("select 1 from room_users where room_id = ? and user_id = ?", roomID, uid).Err()
+	var exists bool
+	err := db.QueryRowContext(context.Background(), "select 1 from room_users where room_id = ? and user_id = ?", roomID, uid).Scan(&exists)
 	if err != nil {
 		return false
 	}
@@ -222,7 +248,8 @@ func userBelongsTo(uid int, roomID int) bool {
 func messageBelongsToRoom(messageID int, roomID int) bool {
 	db := config.Db
 
-	err := db.QueryRow("select 1 from messages where message_id = ? and room_id = ?", messageID, roomID).Err()
+	var exists bool
+	err := db.QueryRowContext(context.Background(), "select 1 from messages where message_id = ? and room_id = ?", messageID, roomID).Scan(&exists)
 	if err != nil {
 		return false
 	}

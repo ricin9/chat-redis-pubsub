@@ -65,7 +65,7 @@ func Signup(c *fiber.Ctx) error {
 	}
 
 	message := fmt.Sprintf("New user has joined, welcome %s", user.Username)
-	err = services.PersistPublishMessage(0, services.WsIncomingMessage{RoomID: 1, Content: message})
+	err = services.PersistPublishMessage(c.Context(), 0, services.WsIncomingMessage{RoomID: 1, Content: message})
 	if err != nil {
 		log.Println(err)
 		return c.Format("failed to notify users of promotion")
@@ -92,7 +92,7 @@ func Login(c *fiber.Ctx) error {
 	db := config.Db
 	var uid int
 	var hash string
-	err = db.QueryRow("SELECT user_id, password FROM users WHERE username = ?", user.Username).Scan(&uid, &hash)
+	err = db.QueryRowContext(c.Context(), "SELECT user_id, password FROM users WHERE username = ?", user.Username).Scan(&uid, &hash)
 	if err != nil {
 		return c.Render("partials/login-form", fiber.Map{"Message": "Invalid username or password", "User": user})
 	}

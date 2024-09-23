@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"database/sql"
 	"ricin9/fiber-chat/config"
 )
@@ -66,10 +67,10 @@ func GetRoomMembers(roomID int) (members []Member, err error) {
 	return members, nil
 }
 
-func GetRoom(roomId int) (room Room, err error) {
+func GetRoom(ctx context.Context, roomId int) (room Room, err error) {
 	db := config.Db
 
-	err = db.QueryRow("SELECT room_id, name FROM rooms WHERE room_id = ?", roomId).Scan(&room.ID, &room.Name)
+	err = db.QueryRowContext(ctx, "SELECT room_id, name FROM rooms WHERE room_id = ?", roomId).Scan(&room.ID, &room.Name)
 	if err != nil {
 		return Room{}, err
 	}

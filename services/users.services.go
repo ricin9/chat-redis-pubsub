@@ -1,15 +1,16 @@
 package services
 
 import (
+	"context"
 	"log"
 	"ricin9/fiber-chat/config"
 )
 
-func GetUsername(uid int) string {
+func GetUsername(ctx context.Context, uid int) string {
 	db := config.Db
 
 	var username string
-	err := db.QueryRow("SELECT username FROM users WHERE user_id = ?", uid).Scan(&username)
+	err := db.QueryRowContext(ctx, "SELECT username FROM users WHERE user_id = ?", uid).Scan(&username)
 	if err != nil {
 		log.Println("error getting username", err)
 		return "unknown"

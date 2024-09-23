@@ -32,7 +32,7 @@ func AddRoomMember(c *fiber.Ctx) error {
 	db := config.Db
 
 	var username string
-	err = db.QueryRow("select username from room_users join users using (user_id) where room_id = ? and user_id = ? and admin = 1",
+	err = db.QueryRowContext(c.Context(), "select username from room_users join users using (user_id) where room_id = ? and user_id = ? and admin = 1",
 		roomID, uid).Scan(&username)
 
 	if err != nil {
@@ -40,14 +40,14 @@ func AddRoomMember(c *fiber.Ctx) error {
 	}
 
 	var memberId int
-	err = db.QueryRow("select user_id from users where username = ?", memberUsername).Scan(&memberId)
+	err = db.QueryRowContext(c.Context(), "select user_id from users where username = ?", memberUsername).Scan(&memberId)
 	if err != nil {
 		msg := fmt.Sprintf("user %s does not exist", memberUsername)
 		return c.Render("partials/room-add-member-form", fiber.Map{"Error": msg, "RoomID": roomID, "Username": memberUsername})
 	}
 
 	var exists bool
-	err = db.QueryRow("select 1 from room_users join users using (user_id) where room_id = ? and user_id = ?",
+	err = db.QueryRowContext(c.Context(), "select 1 from room_users join users using (user_id) where room_id = ? and user_id = ?",
 		roomID, memberId).Scan(&exists)
 
 	if err == nil {
@@ -62,7 +62,7 @@ func AddRoomMember(c *fiber.Ctx) error {
 		return c.Format("Unknown Error adding user to room")
 	}
 
-	room, err := services.GetRoom(roomID)
+	room, err := services.GetRoom(c.Context(), roomID)
 	if err != nil {
 		log.Println(err)
 		c.Format("added member, but failed to notify users of new member")
@@ -80,7 +80,7 @@ func AddRoomMember(c *fiber.Ctx) error {
 	rdb.Publish(c.Context(), "user:"+strconv.Itoa(memberId), roomChangeJson)
 
 	message := fmt.Sprintf("%s has added %s to the room", username, memberUsername)
-	err = services.PersistPublishMessage(0, services.WsIncomingMessage{RoomID: roomID, Content: message})
+	err = services.PersistPublishMessage(c.Context(), 0, services.WsIncomingMessage{RoomID: roomID, Content: message})
 	if err != nil {
 		log.Println(err)
 		return c.Format("failed to notify users of new member addition")
@@ -103,7 +103,7 @@ func KickMember(c *fiber.Ctx) error {
 	db := config.Db
 
 	var username string
-	err = db.QueryRow("select username from room_users join users using (user_id) where room_id = ? and user_id = ? and admin = 1",
+	err = db.QueryRowContext(c.Context(), "select username from room_users join users using (user_id) where room_id = ? and user_id = ? and admin = 1",
 		roomID, uid).Scan(&username)
 
 	if err != nil {
@@ -111,7 +111,7 @@ func KickMember(c *fiber.Ctx) error {
 	}
 
 	var memberUsername string
-	err = db.QueryRow("select username from room_users join users using (user_id) where room_id = ? and user_id = ?", roomID, memberId).Scan(&memberUsername)
+	err = db.QueryRowContext(c.Context(), "select username from room_users join users using (user_id) where room_id = ? and user_id = ?", roomID, memberId).Scan(&memberUsername)
 	if err != nil {
 		return c.Format("user does not belong to this room")
 	}
@@ -122,8 +122,18 @@ func KickMember(c *fiber.Ctx) error {
 		return c.Format("there was an error deleting the user")
 	}
 
+	// notify user of room change
+	rdb := config.RedisClient
+	roomChangePayload := RoomChangePayload{ID: int(roomID), Name: "", Type: RoomChangeLeave}
+	roomChangeJson, err := json.Marshal(roomChangePayload)
+	if err != nil {
+		log.Println(err)
+		return c.Format("error notifying users of new room")
+	}
+	rdb.Publish(c.Context(), "user:"+strconv.Itoa(memberId), roomChangeJson)
+
 	message := fmt.Sprintf("%s has kicked %s", username, memberUsername)
-	err = services.PersistPublishMessage(0, services.WsIncomingMessage{RoomID: roomID, Content: message})
+	err = services.PersistPublishMessage(c.Context(), 0, services.WsIncomingMessage{RoomID: roomID, Content: message})
 	if err != nil {
 		log.Println(err)
 		return c.Format("failed to notify users of kicking")
@@ -144,7 +154,7 @@ func PromoteMember(c *fiber.Ctx) error {
 	db := config.Db
 
 	var username string
-	err = db.QueryRow("select username from room_users join users using (user_id) where room_id = ? and user_id = ? and admin = 1",
+	err = db.QueryRowContext(c.Context(), "select username from room_users join users using (user_id) where room_id = ? and user_id = ? and admin = 1",
 		roomID, uid).Scan(&username)
 
 	if err != nil {
@@ -152,7 +162,7 @@ func PromoteMember(c *fiber.Ctx) error {
 	}
 
 	var memberUsername string
-	err = db.QueryRow("select username from room_users join users using (user_id) where room_id = ? and user_id = ?", roomID, memberId).Scan(&memberUsername)
+	err = db.QueryRowContext(c.Context(), "select username from room_users join users using (user_id) where room_id = ? and user_id = ?", roomID, memberId).Scan(&memberUsername)
 	if err != nil {
 		return c.Format("user does not belong to this room")
 	}
@@ -164,7 +174,7 @@ func PromoteMember(c *fiber.Ctx) error {
 	}
 
 	message := fmt.Sprintf("%s has promoted %s to admin", username, memberUsername)
-	err = services.PersistPublishMessage(0, services.WsIncomingMessage{RoomID: roomID, Content: message})
+	err = services.PersistPublishMessage(c.Context(), 0, services.WsIncomingMessage{RoomID: roomID, Content: message})
 	if err != nil {
 		log.Println(err)
 		return c.Format("failed to notify users of promotion")
@@ -186,7 +196,7 @@ func DemoteMember(c *fiber.Ctx) error {
 	db := config.Db
 
 	var username string
-	err = db.QueryRow("select username from room_users join users using (user_id) where room_id = ? and user_id = ? and admin = 1",
+	err = db.QueryRowContext(c.Context(), "select username from room_users join users using (user_id) where room_id = ? and user_id = ? and admin = 1",
 		roomID, uid).Scan(&username)
 
 	if err != nil {
@@ -194,7 +204,7 @@ func DemoteMember(c *fiber.Ctx) error {
 	}
 
 	var memberUsername string
-	err = db.QueryRow("select username from room_users join users using (user_id) where room_id = ? and user_id = ?", roomID, memberId).Scan(&memberUsername)
+	err = db.QueryRowContext(c.Context(), "select username from room_users join users using (user_id) where room_id = ? and user_id = ?", roomID, memberId).Scan(&memberUsername)
 	if err != nil {
 		return c.Format("user does not belong to this room")
 	}
@@ -205,7 +215,7 @@ func DemoteMember(c *fiber.Ctx) error {
 		return c.Format("there was an error demoting the user")
 	}
 	message := fmt.Sprintf("%s has demoted %s", username, memberUsername)
-	err = services.PersistPublishMessage(0, services.WsIncomingMessage{RoomID: roomID, Content: message})
+	err = services.PersistPublishMessage(c.Context(), 0, services.WsIncomingMessage{RoomID: roomID, Content: message})
 	if err != nil {
 		log.Println(err)
 		return c.Format("failed to notify users of demotion")

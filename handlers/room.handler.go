@@ -29,12 +29,12 @@ func GetRoom(c *fiber.Ctx) error {
 	db := config.Db
 
 	var roomName string
-	err = db.QueryRow("select rooms.name from room_users join rooms using (room_id) where room_id = ? and user_id = ?", roomID, uid).Scan(&roomName)
+	err = db.QueryRowContext(c.Context(), "select rooms.name from room_users join rooms using (room_id) where room_id = ? and user_id = ?", roomID, uid).Scan(&roomName)
 	if err != nil {
 		return c.Format("you are not a member of this room")
 	}
 
-	messages, err := services.GetMessages(uid, roomID, 1)
+	messages, err := services.GetMessages(c.Context(), uid, roomID, 1)
 	if err != nil {
 		log.Println("[GET / Rooms/:id] getMessages err: ", err)
 		return c.Format("Error getting messages")
@@ -122,13 +122,13 @@ func CreateRoom(c *fiber.Ctx) error {
 		return c.Format("error notifying users of new room")
 	}
 	// optimize later
-	username := services.GetUsername(uid.(int))
+	username := services.GetUsername(c.Context(), uid.(int))
 	var systemMessages []string
 
 	systemMessages = append(systemMessages, fmt.Sprintf("%s has created room %s", username, room.Name))
 	for _, id := range userIds {
 		if id != uid {
-			systemMessages = append(systemMessages, fmt.Sprintf("%s has added %s to the room", username, services.GetUsername(id)))
+			systemMessages = append(systemMessages, fmt.Sprintf("%s has added %s to the room", username, services.GetUsername(c.Context(), id)))
 		}
 	}
 
@@ -137,7 +137,7 @@ func CreateRoom(c *fiber.Ctx) error {
 	}
 
 	for _, message := range systemMessages {
-		err := services.PersistPublishMessage(0, services.WsIncomingMessage{RoomID: int(roomID), Content: message})
+		err := services.PersistPublishMessage(c.Context(), 0, services.WsIncomingMessage{RoomID: int(roomID), Content: message})
 		if err != nil {
 			log.Println(err)
 			return c.Format("unknown error has occured")
@@ -162,7 +162,7 @@ func GetRoomInfo(c *fiber.Ctx) error {
 
 	var roomName string
 	var admin bool
-	err = db.QueryRow("select rooms.name, admin from room_users join rooms using (room_id) where room_id = ? and user_id = ?", roomID, uid).Scan(&roomName, &admin)
+	err = db.QueryRowContext(c.Context(), "select rooms.name, admin from room_users join rooms using (room_id) where room_id = ? and user_id = ?", roomID, uid).Scan(&roomName, &admin)
 	if err != nil {
 		return c.Format("you are not a member of this room")
 	}

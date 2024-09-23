@@ -17,12 +17,13 @@ func GetMessages(c *fiber.Ctx) error {
 
 	db := config.Db
 
-	err = db.QueryRow("select 1 from room_users where room_id = ? and user_id = ?", roomID, uid).Err()
+	var exists bool
+	err = db.QueryRowContext(c.Context(), "select 1 from room_users where room_id = ? and user_id = ?", roomID, uid).Scan(&exists)
 	if err != nil {
 		return c.Format("you are not a member of this room")
 	}
 
-	messages, err := services.GetMessages(uid, roomID, page)
+	messages, err := services.GetMessages(c.Context(), uid, roomID, page)
 	if err != nil {
 		return c.Format("Error getting messages")
 	}

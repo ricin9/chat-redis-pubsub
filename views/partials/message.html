@@ -1,4 +1,4 @@
 {{define "partials/message"}} {{ if eq .UserID $.uid }} {{template
-"partials/message-right" .}} {{ else if not .UserId }} {{template
+"partials/message-right" .}} {{ else if not .UserID }} {{template
 "partials/message-middle" .}} {{else}} {{template "partials/message-left" .}} {{
 end }} {{end}}
