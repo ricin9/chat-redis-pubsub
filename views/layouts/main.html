@@ -18,7 +18,10 @@
         class="w-64 bg-white shadow-md fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-20"
       >
         <div class="p-4 bg-blue-600 flex justify-between items-center">
-          <h1 class="text-white text-xl font-bold">Chat App</h1>
+          <h1 class="text-white text-xl font-bold">
+            Chat App
+            <span class="text-base text-neutral-100">({{.Username}})</span>
+          </h1>
           <button
             id="closeSidebar"
             class="text-white md:hidden"
@@ -63,7 +66,7 @@
               Create New Room
             </button>
             <button
-              id="logoutBtn"
+              hx-get="/logout"
               class="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-150 ease-in-out"
             >
               Logout

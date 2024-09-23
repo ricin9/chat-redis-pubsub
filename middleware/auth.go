@@ -25,7 +25,8 @@ func Authenticate(c *fiber.Ctx) error {
 	db := config.Db
 
 	var uid int
-	err := db.QueryRowContext(c.Context(), "SELECT user_id FROM sessions WHERE session_id = ? AND expires_at > datetime('now')", sid).Scan(&uid)
+	var username string
+	err := db.QueryRowContext(c.Context(), "SELECT user_id, username FROM sessions join users using (user_id) WHERE session_id = ? AND expires_at > datetime('now')", sid).Scan(&uid, &username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return redirect(c)
@@ -35,5 +36,6 @@ func Authenticate(c *fiber.Ctx) error {
 	}
 
 	c.Locals("uid", uid)
+	c.Locals("username", username)
 	return c.Next()
 }

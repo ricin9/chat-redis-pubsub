@@ -21,6 +21,7 @@ type CreateRoomInput struct {
 
 func GetRoom(c *fiber.Ctx) error {
 	uid := c.Locals("uid").(int)
+	username := c.Locals("username").(string)
 	roomID, err := c.ParamsInt("id")
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -49,7 +50,7 @@ func GetRoom(c *fiber.Ctx) error {
 		log.Println("Error getting rooms: ", err)
 	}
 
-	return c.Render("layouts/main", fiber.Map{"Messages": messages, "Rooms": rooms, "RoomID": roomID, "RoomName": roomName})
+	return c.Render("layouts/main", fiber.Map{"Messages": messages, "Rooms": rooms, "RoomID": roomID, "RoomName": roomName, "Username": username})
 }
 
 func CreateRoom(c *fiber.Ctx) error {
@@ -174,4 +175,39 @@ func GetRoomInfo(c *fiber.Ctx) error {
 
 	return c.Render("partials/room-info-modal", fiber.Map{"Members": members, "RoomID": roomID,
 		"RoomName": roomName, "CurrentIsAdmin": admin})
+}
+
+func LeaveRoom(c *fiber.Ctx) error {
+	uid := c.Locals("uid").(int)
+	roomID, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	db := config.Db
+
+	_, err = db.Exec("delete from room_users where room_id = ? and user_id = ?", roomID, uid)
+	if err != nil {
+		return c.Format("there was an error leaving the room")
+	}
+
+	// notify user of room change
+	rdb := config.RedisClient
+	roomChangePayload := RoomChangePayload{ID: int(roomID), Name: "", Type: RoomChangeLeave}
+	roomChangeJson, err := json.Marshal(roomChangePayload)
+	if err != nil {
+		log.Println(err)
+		return c.Format("error notifying users of new room")
+	}
+	rdb.Publish(c.Context(), "user:"+strconv.Itoa(uid), roomChangeJson)
+
+	message := fmt.Sprintf("%s has left the room", services.GetUsername(c.Context(), uid))
+	err = services.PersistPublishMessage(c.Context(), 0, services.WsIncomingMessage{RoomID: roomID, Content: message})
+	if err != nil {
+		log.Println(err)
+		return c.Format("failed to notify users of room leave")
+	}
+
+	return c.Render("partials/message-middle", fiber.Map{"Content": "You have left the room"})
 }

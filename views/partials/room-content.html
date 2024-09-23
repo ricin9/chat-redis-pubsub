@@ -35,7 +35,9 @@
         Room Info
       </button>
       <button
-        id="leaveRoomBtn"
+        hx-post="/rooms/{{.RoomID}}/leave"
+        hx-target="#room-{{.RoomID}}-messages"
+        hx-swap="beforeend scroll:bottom"
         class="bg-red-500 text-white px-3 py-1 rounded-full hover:bg-red-600 transition duration-150 ease-in-out"
       >
         Leave Room
