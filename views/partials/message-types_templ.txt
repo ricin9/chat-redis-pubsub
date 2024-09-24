@@ -1,0 +1,14 @@
+<div class=\"flex items-start space-x-2 justify-end mt-4\"
+><div><p class=\"font-medium text-right\">You</p><p class=\"bg-blue-600 text-white p-2 rounded-lg shadow\">
+</p><div class=\"mt-1 flex items-center space-x-2 justify-end\"><button class=\"text-sm text-blue-500 hover:underline\">Reply</button></div></div><img src=\"
+\" alt=\"
+\" class=\"w-10 h-10 rounded-full\"></div>
+<div class=\"flex items-start justify-center space-x-2 mt-4\" class=\"flex items-start space-x-2 justify-end mt-4\"
+><div><p class=\"bg-white p-2 rounded-lg shadow\">
+</p></div></div>
+<div class=\"flex items-start space-x-2 mt-4\" class=\"flex items-start justify-center space-x-2 mt-4\" class=\"flex items-start space-x-2 justify-end mt-4\"
+><img src=\"
+\" alt=\"
+\" class=\"w-10 h-10 rounded-full\"><div><p class=\"font-medium\">
+</p><p class=\"bg-white p-2 rounded-lg shadow\">
+</p><div class=\"mt-1 flex items-center space-x-2\"><button class=\"text-sm text-blue-500 hover:underline\">Reply</button></div></div></div>

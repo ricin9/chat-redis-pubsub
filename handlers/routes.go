@@ -13,21 +13,13 @@ func Setup(app *fiber.App) {
 
 	app.Get("/rooms/:id", middleware.Authenticate, GetRoom)
 
-	app.Get("/login", func(c *fiber.Ctx) error {
-		return c.Render("pages/login", fiber.Map{}, "layouts/auth")
-	})
+	app.Get("/login", LoginView)
 	app.Post("/login", Login)
 
-	app.Get("/signup", func(c *fiber.Ctx) error {
-		return c.Render("pages/signup", fiber.Map{}, "layouts/auth")
-	})
+	app.Get("/signup", SignUpView)
 	app.Post("/signup", Signup)
 
 	app.Get("/logout", Logout)
-
-	app.Get("/create-room", middleware.Authenticate, func(c *fiber.Ctx) error {
-		return c.Render("pages/create-room", nil, "layouts/base")
-	})
 
 	app.Post("/create-room", middleware.Authenticate, CreateRoom)
 

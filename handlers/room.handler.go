@@ -8,10 +8,14 @@ import (
 	"ricin9/fiber-chat/config"
 	"ricin9/fiber-chat/services"
 	"ricin9/fiber-chat/utils"
+	"ricin9/fiber-chat/views/layouts"
+	"ricin9/fiber-chat/views/partials"
 	"strconv"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 )
 
 type CreateRoomInput struct {
@@ -21,7 +25,6 @@ type CreateRoomInput struct {
 
 func GetRoom(c *fiber.Ctx) error {
 	uid := c.Locals("uid").(int)
-	username := c.Locals("username").(string)
 	roomID, err := c.ParamsInt("id")
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -42,7 +45,9 @@ func GetRoom(c *fiber.Ctx) error {
 	}
 
 	if c.Get("HX-Request") != "" {
-		return c.Render("partials/room-content", fiber.Map{"Messages": messages, "RoomID": roomID, "RoomName": roomName})
+		body := partials.RoomContent(services.Room{ID: roomID, Name: roomName}, messages)
+		templHandler := templ.Handler(body)
+		return adaptor.HTTPHandler(templHandler)(c)
 	}
 
 	rooms, err := services.GetRoomsFor(uid)
@@ -50,7 +55,10 @@ func GetRoom(c *fiber.Ctx) error {
 		log.Println("Error getting rooms: ", err)
 	}
 
-	return c.Render("layouts/main", fiber.Map{"Messages": messages, "Rooms": rooms, "RoomID": roomID, "RoomName": roomName, "Username": username})
+	body := layouts.MainLayout("Chat App",
+		services.Room{ID: roomID, Name: roomName}, messages, rooms)
+	templHandler := templ.Handler(body)
+	return adaptor.HTTPHandler(templHandler)(c)
 }
 
 func CreateRoom(c *fiber.Ctx) error {
@@ -64,7 +72,12 @@ func CreateRoom(c *fiber.Ctx) error {
 	err := validate.Struct(room)
 	if err != nil {
 		errors := utils.FormatErrors(err)
-		return c.Render("partials/create-room-form", fiber.Map{"Errors": errors, "Room": room})
+		templHandler := templ.Handler(partials.CreateRoomForm(partials.CreateRoomFormData{
+			Name:   room.Name,
+			Users:  room.Users,
+			Errors: errors,
+		}))
+		return adaptor.HTTPHandler(templHandler)(c)
 	}
 
 	users := strings.Split(room.Users, ",")
@@ -175,8 +188,9 @@ func GetRoomInfo(c *fiber.Ctx) error {
 		return c.Format("Error getting members")
 	}
 
-	return c.Render("partials/room-info-modal", fiber.Map{"Members": members, "RoomID": roomID,
-		"RoomName": roomName, "CurrentIsAdmin": admin})
+	templHandler := templ.Handler(partials.RoomInfoModal(
+		services.Room{ID: roomID, Name: roomName}, members, admin))
+	return adaptor.HTTPHandler(templHandler)(c)
 }
 
 func LeaveRoom(c *fiber.Ctx) error {
@@ -211,5 +225,6 @@ func LeaveRoom(c *fiber.Ctx) error {
 		return c.Format("failed to notify users of room leave")
 	}
 
-	return c.Render("partials/message-middle", fiber.Map{"Content": "You have left the room"})
+	templHandler := templ.Handler(partials.MessageMiddle(0, services.Message{Content: "You have left the room"}, false, 0))
+	return adaptor.HTTPHandler(templHandler)(c)
 }

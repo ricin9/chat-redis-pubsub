@@ -1,9 +1,0 @@
-<ul id="room-list" hx-swap-oob="delete:#room-{{.RoomID}}"></ul>
-
-<div hx-swap-oob="outerHTML:#room-{{.RoomID}}-messages">
-  {{template "partials/message-middle" .}}
-</div>
-
-<div
-  hx-swap-oob='delete:#message-input:has(form[hx-vals$=":{{.RoomID}}}"])'
-></div>

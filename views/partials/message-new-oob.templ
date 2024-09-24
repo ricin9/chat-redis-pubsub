@@ -1,0 +1,17 @@
+package partials
+
+import (
+	"fmt"
+	"ricin9/fiber-chat/services"
+	"strconv"
+)
+
+templ NewMessageOOB(roomID int, message services.Message) {
+	<div
+		id={ fmt.Sprintf("room-%d-messages", roomID) }
+		data-room-id={ strconv.Itoa(roomID) }
+		hx-swap-oob="beforeend"
+	>
+		@Message(roomID, message, false, 0)
+	</div>
+}

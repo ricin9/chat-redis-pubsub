@@ -1,0 +1,19 @@
+package partials
+
+import (
+	"fmt"
+	"ricin9/fiber-chat/services"
+)
+
+templ KickedNotificationOOB(roomID int) {
+	// deletes room from sidebar
+	<ul id="room-list" hx-swap-oob={ fmt.Sprintf("delete:#room-%d", roomID) }></ul>
+	// sends middle message after clearing all messages
+	<div hx-swap-oob="outerHTML:#room-{{.RoomID}}-messages">
+		@MessageMiddle(roomID, services.Message{Content: "You have been kicked from this room"}, false, 0)
+	</div>
+	// removes message input
+	<div
+		hx-swap-oob={ fmt.Sprintf(`delete:#message-input:has(form[hx-vals$=":%d"])`, roomID) }
+	></div>
+}

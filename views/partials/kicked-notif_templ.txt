@@ -1,0 +1,4 @@
+<ul id=\"room-list\" hx-swap-oob=\"
+\"></ul><div hx-swap-oob=\"outerHTML:#room-{{.RoomID}}-messages\">
+</div><div hx-swap-oob=\"
+\"></div>

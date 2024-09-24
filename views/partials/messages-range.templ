@@ -1,0 +1,14 @@
+
+package partials
+
+import "ricin9/fiber-chat/services"
+
+templ MessagesRange(room services.Room, messages []services.Message, nextPage int) {
+	for idx, message := range messages {
+		if idx == 0 {
+			@Message(room.ID, message, true, nextPage)
+		} else {
+			@Message(room.ID, message, false, 0)
+		}
+	}
+}

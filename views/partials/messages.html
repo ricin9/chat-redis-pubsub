@@ -1,7 +1,0 @@
-<div
-  class="flex-1 overflow-y-auto p-4 scroll-auto"
-  id="room-{{.RoomID}}-messages"
-  hx-on:scroll="if (this.scrollHeight - this.scrollTop === this.clientHeight) { resetUnread({{.RoomID}}); }"
->
-  {{template "partials/message-range-pagination" . }}
-</div>

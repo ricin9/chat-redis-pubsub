@@ -1,0 +1,16 @@
+package partials
+
+import (
+	"fmt"
+	"ricin9/fiber-chat/services"
+)
+
+templ Messages(room services.Room, messages []services.Message, nextPage int) {
+	<div
+		class="flex-1 overflow-y-auto p-4 scroll-auto"
+		id={ fmt.Sprintf("room-%d-messages", room.ID) }
+		onscroll="handleMessagesScroll"
+	>
+		@MessagesRange(room, messages, nextPage)
+	</div>
+}

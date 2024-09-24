@@ -1,18 +1,16 @@
 package handlers
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"html/template"
 	"log"
 	"ricin9/fiber-chat/config"
 	"ricin9/fiber-chat/services"
+	"ricin9/fiber-chat/views/partials"
 	"strconv"
 	"sync"
 
 	"github.com/gofiber/contrib/websocket"
-	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -36,11 +34,11 @@ func (c *WsClient) Init() {
 	c.pubsub = config.RedisClient.Subscribe(context.Background(), chans...)
 }
 
-func (c *WsClient) Write(p []byte) error {
+func (c *WsClient) Write(p []byte) (int, error) {
 	c.writeMu.Lock()
 	defer c.writeMu.Unlock()
 
-	return c.WsConn.WriteMessage(1, p)
+	return len(p), c.WsConn.WriteMessage(1, p)
 }
 
 func (c *WsClient) JoinRoom(data PSJoinRoom) error {
@@ -49,27 +47,12 @@ func (c *WsClient) JoinRoom(data PSJoinRoom) error {
 		log.Println(err)
 	}
 
-	tmpl, err := template.ParseFiles("views/partials/room.html")
-	if err != nil {
-		fmt.Println("could not find template file", err)
+	component := partials.JoinRoomOOB(services.Room{ID: data.RoomID, Name: data.Name})
+	if err := component.Render(context.Background(), c); err != nil {
+		log.Println(err)
 		return err
 	}
 
-	var output bytes.Buffer
-	err = tmpl.Execute(&output, fiber.Map{"ID": data.RoomID, "Name": data.Name})
-	if err != nil {
-		fmt.Println("error executing template", err)
-		return err
-	}
-
-	result := output.String()
-
-	result = `<ul id="room-list" hx-swap-oob="afterbegin">` + result + `</ul>`
-
-	if err := c.Write([]byte(result)); err != nil {
-		log.Fatalln("write error: ", err)
-		return err
-	}
 	return nil
 }
 
@@ -79,29 +62,9 @@ func (c *WsClient) KickedFromRoom(data PSKickedFromRoom) error {
 		log.Println(err)
 	}
 
-	tmpl, err := template.ParseFiles("views/partials/kicked-notif.html",
-		"views/partials/message-middle.html")
-
-	if err != nil {
-		fmt.Println("could not find template file", err)
-		return err
-	}
-
-	var output bytes.Buffer
-	err = tmpl.Execute(&output, fiber.Map{
-		"Content": "You have been kicked from this room",
-		"RoomID":  data.RoomID,
-	})
-
-	if err != nil {
-		fmt.Println("error executing template", err)
-		return err
-	}
-
-	result := output.Bytes()
-
-	if err := c.Write(result); err != nil {
-		log.Fatalln("write error: ", err)
+	component := partials.KickedNotificationOOB(data.RoomID)
+	if err := component.Render(context.Background(), c); err != nil {
+		log.Println(err)
 		return err
 	}
 	return nil
@@ -113,36 +76,17 @@ func (c *WsClient) LeaveRoom(data PSLeaveRoom) error {
 }
 
 func (c *WsClient) SendMessage(payload PSMessageBroadcast) error {
-	tmpl, err := template.ParseFiles("views/partials/message-with-room-reorder.html",
-		"views/partials/message.html",
-		"views/partials/message-right.html",
-		"views/partials/message-left.html",
-		"views/partials/message-middle.html")
-	if err != nil {
-		fmt.Println("could not find template file", err)
-		return err
-	}
 
-	var output bytes.Buffer
-	err = tmpl.Execute(&output, fiber.Map{
-		"ID":        payload.ID,
-		"UserID":    payload.UserID,
-		"RoomID":    payload.RoomID,
-		"Username":  payload.Username,
-		"Content":   payload.Content,
-		"CreatedAt": payload.CreatedAt,
-		"uid":       c.Uid,
+	component := partials.NewMessageOOB(payload.RoomID, services.Message{
+		ID:        payload.ID,
+		UserID:    payload.UserID,
+		Username:  payload.Username,
+		Content:   payload.Content,
+		CreatedAt: payload.CreatedAt,
 	})
 
-	if err != nil {
-		fmt.Println("error executing template", err)
-		return err
-	}
-
-	result := output.String()
-
-	if err := c.Write([]byte(result)); err != nil {
-		log.Fatalln("write error: ", err)
+	if err := component.Render(context.WithValue(context.Background(), "uid", c.Uid), c); err != nil {
+		log.Println(err)
 		return err
 	}
 	return nil

@@ -6,8 +6,13 @@ import (
 	"ricin9/fiber-chat/config"
 	"ricin9/fiber-chat/services"
 	"ricin9/fiber-chat/utils"
+	"ricin9/fiber-chat/views/layouts"
+	"ricin9/fiber-chat/views/pages"
+	"ricin9/fiber-chat/views/partials"
 
+	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -17,6 +22,16 @@ type (
 		Password string `validate:"required,min=6,max=32"`
 	}
 )
+
+func SignUpView(c *fiber.Ctx) error {
+	templHandler := templ.Handler(layouts.AuthLayout("Login - Chat App", pages.Signup()))
+	return adaptor.HTTPHandler(templHandler)(c)
+}
+
+func LoginView(c *fiber.Ctx) error {
+	templHandler := templ.Handler(layouts.AuthLayout("Login - Chat App", pages.Login()))
+	return adaptor.HTTPHandler(templHandler)(c)
+}
 
 func Signup(c *fiber.Ctx) error {
 	validate := config.Validate
@@ -29,7 +44,9 @@ func Signup(c *fiber.Ctx) error {
 	err := validate.Struct(user)
 	if err != nil {
 		errors := utils.FormatErrors(err)
-		return c.Render("partials/signup-form", fiber.Map{"Errors": errors, "User": user})
+		templHandler := templ.Handler(partials.SignupForm(
+			partials.LoginFormData{Errors: errors, Username: user.Username, Password: user.Password}))
+		return adaptor.HTTPHandler(templHandler)(c)
 	}
 
 	hash, err := utils.HashPassword(user.Password)
@@ -86,7 +103,9 @@ func Login(c *fiber.Ctx) error {
 	err := validate.Struct(user)
 	if err != nil {
 		errors := utils.FormatErrors(err)
-		return c.Render("partials/signup-form", fiber.Map{"Errors": errors, "User": user})
+		templHandler := templ.Handler(partials.LoginForm(
+			partials.LoginFormData{Errors: errors, Username: user.Username, Password: user.Password}))
+		return adaptor.HTTPHandler(templHandler)(c)
 	}
 
 	db := config.Db
@@ -94,12 +113,16 @@ func Login(c *fiber.Ctx) error {
 	var hash string
 	err = db.QueryRowContext(c.Context(), "SELECT user_id, password FROM users WHERE username = ?", user.Username).Scan(&uid, &hash)
 	if err != nil {
-		return c.Render("partials/login-form", fiber.Map{"Message": "Invalid username or password", "User": user})
+		templHandler := templ.Handler(partials.LoginForm(partials.LoginFormData{
+			Username: user.Username, Password: user.Password, Message: "Invalid username or password"}))
+		return adaptor.HTTPHandler(templHandler)(c)
 	}
 
 	same, err := utils.ComparePassword(hash, user.Password)
 	if err != nil || !same {
-		return c.Render("partials/login-form", fiber.Map{"Message": "Invalid username or password", "User": user})
+		templHandler := templ.Handler(partials.LoginForm(partials.LoginFormData{
+			Username: user.Username, Password: user.Password, Message: "Invalid username or password"}))
+		return adaptor.HTTPHandler(templHandler)(c)
 	}
 
 	err = utils.CreateSession(c, uid)

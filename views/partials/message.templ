@@ -1,0 +1,16 @@
+package partials
+
+import (
+	"ricin9/fiber-chat/services"
+	"ricin9/fiber-chat/utils"
+)
+
+templ Message(roomId int, message services.Message, paginateUp bool, nextPage int) {
+	if message.UserID == utils.GetUserId(ctx) {
+		@MessageRight(roomId, message, paginateUp, nextPage)
+	} else if message.UserID == 0 {
+		@MessageMiddle(roomId, message, paginateUp, nextPage)
+	} else {
+		@MessageLeft(roomId, message, paginateUp, nextPage)
+	}
+}

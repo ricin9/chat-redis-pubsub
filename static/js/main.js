@@ -187,3 +187,10 @@ function toggleRoomMemberActionDropdown(elem) {
 
   dropdown.classList.toggle('hidden')
 }
+
+function handleMessagesScroll(elem) {
+  if (this.scrollHeight - this.scrollTop === this.clientHeight) {
+    const roomID = location.pathname.split('/').pop()
+    resetUnread(roomID)
+  }
+}

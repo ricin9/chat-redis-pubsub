@@ -1,0 +1,152 @@
+package partials
+
+import (
+	"context"
+	"fmt"
+	"ricin9/fiber-chat/services"
+	"ricin9/fiber-chat/utils"
+)
+
+templ RoomInfoModal(room services.Room, members []services.Member, currentIsAdmin bool) {
+	<div
+		id="room-info-modal"
+		class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center"
+	>
+		<div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+			<h2 class="text-2xl font-bold mb-4">Room Info: # { room.Name }</h2>
+			<div class="space-y-4">
+				<div>
+					<h3 class="text-lg font-semibold">Members:</h3>
+					<ul id="member-list" class="list-disc list-inside h-36 overflow-y-auto">
+						for _, member := range members {
+							@Member(room, member, currentIsAdmin)
+						}
+					</ul>
+				</div>
+				if currentIsAdmin {
+					<div>
+						<h3 class="text-lg font-semibold">Add Member:</h3>
+						@AddMemberForm(room, AddMemberFormData{})
+					</div>
+				}
+				<div class="flex justify-end">
+					<button
+						id="closeRoomInfo"
+						hx-on:click="closeRoomInfo()"
+						class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+					>
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ Member(room services.Room, member services.Member, currentIsAdmin bool) {
+	<li
+		class="flex items-center justify-between"
+		hx-target="this"
+		hx-swap="outerHTML"
+	>
+		<div
+			class="overflow-ellipsis max-w-64 overflow-hidden whitespace-nowrap"
+			title={ displayName(ctx, member) }
+		>
+			{ displayName(ctx, member) }
+		</div>
+		if currentIsAdmin && member.ID != utils.GetUserId(ctx) {
+			<div class="relative">
+				<button
+					class="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+					onclick="toggleRoomMemberActionDropdown(this)"
+				>
+					<svg
+						class="w-5 h-5 text-gray-500"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+					>
+						<path
+							d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"
+						></path>
+					</svg>
+				</button>
+				<div
+					id={ fmt.Sprintf("dropdown-%d-%d", room.ID, member.ID) }
+					class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg"
+				>
+					<div class="py-1">
+						<a
+							hx-swap="delete"
+							hx-post={ fmt.Sprintf("/rooms/%d/members/%d/kick", room.ID, member.ID) }
+							class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+						>Kick</a>
+						if member.Admin {
+							<a
+								hx-post={ fmt.Sprintf("/rooms/%d/members/%d/demote", room.ID, member.ID) }
+								class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+							>Demote</a>
+						} else {
+							<a
+								hx-post={ fmt.Sprintf("/rooms/%d/members/%d/promote", room.ID, member.ID) }
+								class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+							>Promote</a>
+						}
+					</div>
+				</div>
+			</div>
+		}
+	</li>
+}
+
+func displayName(ctx context.Context, member services.Member) (display string) {
+	display = member.Username
+	if member.Admin {
+		return member.Username + " (Admin)"
+	}
+	if member.ID == utils.GetUserId(ctx) {
+		display = display + " (You)"
+	}
+	return display
+}
+
+type AddMemberFormData struct {
+	Username string
+	Message  string
+	Error    string
+}
+
+templ AddMemberForm(room services.Room, formData AddMemberFormData) {
+	<form hx-post={ fmt.Sprintf("/rooms/%d/members", room.ID) }>
+		<p id="message" class="text-yellow-500 text-sm mt-1">{ formData.Message }</p>
+		<div class="flex space-x-2">
+			<input
+				id="name"
+				type="text"
+				name="username"
+				required
+				value={ formData.Username }
+				placeholder="My wonderful room"
+				oninput="this.parentElement.nextElementSibling.textContent = ''"
+				class="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+			/>
+			<button
+				type="submit"
+				class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-150 ease-in-out"
+			>
+				Add
+			</button>
+		</div>
+		<p class="text-red-500 text-sm mt-1">{ formData.Error }</p>
+	</form>
+}
+
+templ AddMemberSuccessOOB(room services.Room, member services.Member) {
+	@AddMemberForm(room, AddMemberFormData{
+		Username: "",
+		Message:  "Member added successfully",
+	})
+	<ul hx-swap-oob="beforeend:#member-list">
+		@Member(room, member, true)
+	</ul>
+}

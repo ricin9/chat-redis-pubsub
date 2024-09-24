@@ -1,0 +1,9 @@
+package partials
+
+import "ricin9/fiber-chat/services"
+
+templ JoinRoomOOB(room services.Room) {
+	<ul id="room-list" hx-swap-oob="afterbegin">
+    @Room(room)
+    </ul>`
+}

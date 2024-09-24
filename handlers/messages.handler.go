@@ -3,8 +3,11 @@ package handlers
 import (
 	"ricin9/fiber-chat/config"
 	"ricin9/fiber-chat/services"
+	"ricin9/fiber-chat/views/partials"
 
+	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 )
 
 func GetMessages(c *fiber.Ctx) error {
@@ -32,5 +35,7 @@ func GetMessages(c *fiber.Ctx) error {
 		return c.SendString("")
 	}
 
-	return c.Render("partials/message-range-pagination", fiber.Map{"Messages": messages, "RoomID": roomID, "NextPage": page + 1})
+	nextpage := page + 1
+	templHandler := templ.Handler(partials.MessagesRange(services.Room{ID: roomID}, messages, nextpage))
+	return adaptor.HTTPHandler(templHandler)(c)
 }

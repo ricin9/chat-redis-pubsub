@@ -7,10 +7,13 @@ import (
 	"ricin9/fiber-chat/config"
 	"ricin9/fiber-chat/services"
 	"ricin9/fiber-chat/utils"
+	"ricin9/fiber-chat/views/partials"
 	"strconv"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 )
 
 func AddRoomMember(c *fiber.Ctx) error {
@@ -26,7 +29,9 @@ func AddRoomMember(c *fiber.Ctx) error {
 	err = config.Validate.Var(memberUsername, "required,min=3,max=32")
 	if err != nil {
 		errmsg := "username" + utils.FormatErrors(err)[""]
-		return c.Render("partials/room-add-member-form", fiber.Map{"Error": errmsg, "RoomID": roomID, "Username": memberUsername})
+		templHandler := templ.Handler(partials.AddMemberForm(
+			services.Room{ID: roomID}, partials.AddMemberFormData{Error: errmsg, Username: memberUsername}))
+		return adaptor.HTTPHandler(templHandler)(c)
 	}
 
 	db := config.Db
@@ -43,7 +48,9 @@ func AddRoomMember(c *fiber.Ctx) error {
 	err = db.QueryRowContext(c.Context(), "select user_id from users where username = ?", memberUsername).Scan(&memberId)
 	if err != nil {
 		msg := fmt.Sprintf("user %s does not exist", memberUsername)
-		return c.Render("partials/room-add-member-form", fiber.Map{"Error": msg, "RoomID": roomID, "Username": memberUsername})
+		templHandler := templ.Handler(partials.AddMemberForm(
+			services.Room{ID: roomID}, partials.AddMemberFormData{Error: msg, Username: memberUsername}))
+		return adaptor.HTTPHandler(templHandler)(c)
 	}
 
 	var exists bool
@@ -52,7 +59,9 @@ func AddRoomMember(c *fiber.Ctx) error {
 
 	if err == nil {
 		msg := fmt.Sprintf("user %s is already a member of this room", memberUsername)
-		return c.Render("partials/room-add-member-form", fiber.Map{"Error": msg, "RoomID": roomID, "Username": memberUsername})
+		templHandler := templ.Handler(partials.AddMemberForm(
+			services.Room{ID: roomID}, partials.AddMemberFormData{Error: msg, Username: memberUsername}))
+		return adaptor.HTTPHandler(templHandler)(c)
 	}
 
 	_, err = db.Exec("insert into room_users (room_id, user_id) values (?, ?)", roomID, memberId)
@@ -88,9 +97,9 @@ func AddRoomMember(c *fiber.Ctx) error {
 		return c.Format("failed to notify users of new member addition")
 	}
 
-	return c.Render("partials/room-add-member-sucess", fiber.Map{
-		"Form":   fiber.Map{"Sucess": "member added successfully", "RoomID": roomID},
-		"Member": fiber.Map{"Username": memberUsername, "Admin": false, "RoomID": roomID, "ID": memberId}})
+	templHandler := templ.Handler(partials.AddMemberSuccessOOB(services.Room{ID: roomID},
+		services.Member{ID: memberId, Username: memberUsername, Admin: false}))
+	return adaptor.HTTPHandler(templHandler)(c)
 }
 
 func KickMember(c *fiber.Ctx) error {
@@ -184,8 +193,9 @@ func PromoteMember(c *fiber.Ctx) error {
 		return c.Format("failed to notify users of promotion")
 	}
 
-	return c.Render("partials/room-info-member-li", fiber.Map{"Username": memberUsername,
-		"Admin": true, "RoomID": roomID, "ID": memberId})
+	templHandler := templ.Handler(partials.Member(services.Room{ID: roomID},
+		services.Member{ID: memberId, Username: memberUsername, Admin: true}, true))
+	return adaptor.HTTPHandler(templHandler)(c)
 }
 
 func DemoteMember(c *fiber.Ctx) error {
@@ -225,6 +235,7 @@ func DemoteMember(c *fiber.Ctx) error {
 		return c.Format("failed to notify users of demotion")
 	}
 
-	return c.Render("partials/room-info-member-li", fiber.Map{"Username": memberUsername,
-		"Admin": false, "RoomID": roomID, "ID": memberId})
+	templHandler := templ.Handler(partials.Member(services.Room{ID: roomID},
+		services.Member{ID: memberId, Username: memberUsername, Admin: false}, true))
+	return adaptor.HTTPHandler(templHandler)(c)
 }
