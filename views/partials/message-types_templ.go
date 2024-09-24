@@ -13,7 +13,7 @@ import (
 	"ricin9/fiber-chat/services"
 )
 
-func MessageRight(roomID int, message services.Message, paginateUp bool, nextPage int) templ.Component {
+func MessageRight(message services.Message, pagination Pagination) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -38,8 +38,8 @@ func MessageRight(roomID int, message services.Message, paginateUp bool, nextPag
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if paginateUp {
-			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, PaginateUpAttrs(roomID, nextPage))
+		if pagination.RoomID != 0 {
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, PaginateUpAttrs(pagination))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -91,7 +91,7 @@ func MessageRight(roomID int, message services.Message, paginateUp bool, nextPag
 	})
 }
 
-func MessageMiddle(roomID int, message services.Message, paginateUp bool, nextPage int) templ.Component {
+func MessageMiddle(message services.Message, pagination Pagination) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -116,8 +116,8 @@ func MessageMiddle(roomID int, message services.Message, paginateUp bool, nextPa
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if paginateUp {
-			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, PaginateUpAttrs(roomID, nextPage))
+		if pagination.RoomID != 0 {
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, PaginateUpAttrs(pagination))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -143,7 +143,7 @@ func MessageMiddle(roomID int, message services.Message, paginateUp bool, nextPa
 	})
 }
 
-func MessageLeft(roomID int, message services.Message, paginateUp bool, nextPage int) templ.Component {
+func MessageLeft(message services.Message, pagination Pagination) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -168,8 +168,8 @@ func MessageLeft(roomID int, message services.Message, paginateUp bool, nextPage
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if paginateUp {
-			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, PaginateUpAttrs(roomID, nextPage))
+		if pagination.RoomID != 0 {
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, PaginateUpAttrs(pagination))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -234,10 +234,10 @@ func MessageLeft(roomID int, message services.Message, paginateUp bool, nextPage
 	})
 }
 
-func PaginateUpAttrs(roomId, nextPage int) templ.Attributes {
+func PaginateUpAttrs(pagination Pagination) templ.Attributes {
 	return templ.Attributes{
-		"hx-get":     fmt.Sprintf("/rooms/%d/messages?page=%d", roomId, nextPage),
-		"hx-trigger": fmt.Sprintf("intersect threshold:0.1 once root:#room-%d-messages delay:100ms", roomId),
+		"hx-get":     fmt.Sprintf("/rooms/%d/messages?page=%d", pagination.RoomID, pagination.nextPage),
+		"hx-trigger": fmt.Sprintf("intersect threshold:0.1 once root:#room-%d-messages delay:100ms", pagination.RoomID),
 		"hx-swap":    "beforebegin",
 	}
 }

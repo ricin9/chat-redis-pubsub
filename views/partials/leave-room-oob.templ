@@ -1,0 +1,14 @@
+package partials
+
+import (
+	"fmt"
+	"ricin9/fiber-chat/services"
+)
+
+templ LeaveRoomOOB(roomID int) {
+	@MessageMiddle(services.Message{Content: "You left this room"}, Pagination{})
+	<ul id="room-list" hx-swap-oob={ fmt.Sprintf("delete:#room-%d", roomID) }></ul>
+	<div
+		hx-swap-oob={ fmt.Sprintf(`delete:#message-input:has(form[hx-vals$=":%d}"])`, roomID) }
+	></div>
+}

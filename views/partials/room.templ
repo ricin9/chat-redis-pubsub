@@ -6,15 +6,15 @@ import (
 )
 
 templ Room(room services.Room) {
-	<li class="mb-2" id={ fmt.Sprintf("room-%d", room.ID) }>
+	<li class="mb-2" id={ fmt.Sprintf("room-%d", room.ID) } class="transition ease-in-out">
 		<a
 			class="p-2 rounded hover:bg-gray-100 transition duration-150 ease-in-out flex justify-between items-center"
 			href={ templ.URL(fmt.Sprintf("/rooms/%d", room.ID)) }
 			hx-get={ string(templ.URL(fmt.Sprintf("/rooms/%d", room.ID))) }
 			hx-target="#room-content"
-			hx-swap={ fmt.Sprintf("outerHTML scroll:#room-%d-messages:bottom", room.ID) }
+			hx-swap={ fmt.Sprintf("innerHTML scroll:#room-%d-messages:bottom", room.ID) }
 			hx-push-url="true"
-			hx-on:click="handleRoomClick(this);"
+			onclick="handleRoomClick(this.parentElement);"
 		>
 			<span># { room.Name }</span>
 			<span
@@ -22,19 +22,4 @@ templ Room(room services.Room) {
 			></span>
 		</a>
 	</li>
-	<script>
-  function hightlightRoom(button) {
-    const rooms = document.querySelectorAll('.selected-room')
-    rooms.forEach((room) => {
-      room.classList.remove('selected-room')
-    })
-    button.parentElement.classList.add('selected-room')
-  }
-  function handleRoomClick(room) {
-	const roomId = room.id.split("-").pop()
-	hightlightRoom(room)
-	resetUnread(roomId)
-	closeSidebar()
-  }
-</script>
 }

@@ -4,13 +4,14 @@ document.addEventListener('DOMContentLoaded', function () {
     return
   }
 
-  const messages = document.getElementById(`room-${currentRoomId}-messages`)
+  const messages = document.querySelector(`[id^=room-][id$=-messages]`)
   if (!messages) {
     return
   }
 
   messages.scrollTo(0, messages.scrollHeight)
 })
+
 document.addEventListener('htmx:wsAfterMessage', function (event) {
   if (!event.detail.message.includes('data-room-id')) {
     return
@@ -27,6 +28,12 @@ document.addEventListener('htmx:wsAfterMessage', function (event) {
 
   if (currentRoomId !== IncomingMessageRoomId) {
     incrementUnread(IncomingMessageRoomId)
+    const room = document.getElementById(`room-${IncomingMessageRoomId}`)
+    const roomList = document.getElementById('room-list')
+
+    if (room) {
+      roomList.prepend(room)
+    }
     return
   }
 
@@ -193,4 +200,18 @@ function handleMessagesScroll(elem) {
     const roomID = location.pathname.split('/').pop()
     resetUnread(roomID)
   }
+}
+
+function hightlightRoom(roomListItem) {
+  const rooms = document.querySelectorAll('.selected-room')
+  rooms.forEach((room) => {
+    room.classList.remove('selected-room')
+  })
+  roomListItem.classList.add('selected-room')
+}
+function handleRoomClick(room) {
+  const roomId = room.id.split('-').pop()
+  hightlightRoom(room)
+  resetUnread(roomId)
+  closeSidebar()
 }

@@ -12,6 +12,6 @@ templ NewMessageOOB(roomID int, message services.Message) {
 		data-room-id={ strconv.Itoa(roomID) }
 		hx-swap-oob="beforeend"
 	>
-		@Message(roomID, message, false, 0)
+		@Message(message, Pagination{})
 	</div>
 }

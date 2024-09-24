@@ -5,12 +5,17 @@ import (
 	"ricin9/fiber-chat/utils"
 )
 
-templ Message(roomId int, message services.Message, paginateUp bool, nextPage int) {
+type Pagination struct {
+	RoomID   int
+	nextPage int
+}
+
+templ Message(message services.Message, pagination Pagination) {
 	if message.UserID == utils.GetUserId(ctx) {
-		@MessageRight(roomId, message, paginateUp, nextPage)
+		@MessageRight(message, pagination)
 	} else if message.UserID == 0 {
-		@MessageMiddle(roomId, message, paginateUp, nextPage)
+		@MessageMiddle(message, pagination)
 	} else {
-		@MessageLeft(roomId, message, paginateUp, nextPage)
+		@MessageLeft(message, pagination)
 	}
 }

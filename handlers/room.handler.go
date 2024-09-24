@@ -9,6 +9,7 @@ import (
 	"ricin9/fiber-chat/services"
 	"ricin9/fiber-chat/utils"
 	"ricin9/fiber-chat/views/layouts"
+	"ricin9/fiber-chat/views/pages"
 	"ricin9/fiber-chat/views/partials"
 	"strconv"
 	"strings"
@@ -45,7 +46,7 @@ func GetRoom(c *fiber.Ctx) error {
 	}
 
 	if c.Get("HX-Request") != "" {
-		body := partials.RoomContent(services.Room{ID: roomID, Name: roomName}, messages)
+		body := pages.RoomContent(services.Room{ID: roomID, Name: roomName}, messages)
 		templHandler := templ.Handler(body)
 		return adaptor.HTTPHandler(templHandler)(c)
 	}
@@ -55,8 +56,8 @@ func GetRoom(c *fiber.Ctx) error {
 		log.Println("Error getting rooms: ", err)
 	}
 
-	body := layouts.MainLayout("Chat App",
-		services.Room{ID: roomID, Name: roomName}, messages, rooms)
+	roomContent := pages.RoomContent(services.Room{ID: roomID, Name: roomName}, messages)
+	body := layouts.Main("Chat App", rooms, roomContent)
 	templHandler := templ.Handler(body)
 	return adaptor.HTTPHandler(templHandler)(c)
 }
@@ -225,6 +226,6 @@ func LeaveRoom(c *fiber.Ctx) error {
 		return c.Format("failed to notify users of room leave")
 	}
 
-	templHandler := templ.Handler(partials.MessageMiddle(0, services.Message{Content: "You have left the room"}, false, 0))
+	templHandler := templ.Handler(partials.LeaveRoomOOB(roomID))
 	return adaptor.HTTPHandler(templHandler)(c)
 }

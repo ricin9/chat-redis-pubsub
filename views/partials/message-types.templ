@@ -5,11 +5,11 @@ import (
 	"ricin9/fiber-chat/services"
 )
 
-templ MessageRight(roomID int, message services.Message, paginateUp bool, nextPage int) {
+templ MessageRight(message services.Message, pagination Pagination) {
 	<div
 		class="flex items-start space-x-2 justify-end mt-4"
-		if paginateUp {
-			{ PaginateUpAttrs(roomID, nextPage)... }
+		if pagination.RoomID != 0 {
+			{ PaginateUpAttrs(pagination)... }
 		}
 	>
 		<div>
@@ -27,12 +27,12 @@ templ MessageRight(roomID int, message services.Message, paginateUp bool, nextPa
 	</div>
 }
 
-templ MessageMiddle(roomID int, message services.Message, paginateUp bool, nextPage int) {
+templ MessageMiddle(message services.Message, pagination Pagination) {
 	<div
 		class="flex items-start justify-center space-x-2 mt-4"
 		class="flex items-start space-x-2 justify-end mt-4"
-		if paginateUp {
-			{ PaginateUpAttrs(roomID, nextPage)... }
+		if pagination.RoomID != 0 {
+			{ PaginateUpAttrs(pagination)... }
 		}
 	>
 		<div>
@@ -41,13 +41,13 @@ templ MessageMiddle(roomID int, message services.Message, paginateUp bool, nextP
 	</div>
 }
 
-templ MessageLeft(roomID int, message services.Message, paginateUp bool, nextPage int) {
+templ MessageLeft(message services.Message, pagination Pagination) {
 	<div
 		class="flex items-start space-x-2 mt-4"
 		class="flex items-start justify-center space-x-2 mt-4"
 		class="flex items-start space-x-2 justify-end mt-4"
-		if paginateUp {
-			{ PaginateUpAttrs(roomID, nextPage)... }
+		if pagination.RoomID != 0 {
+			{ PaginateUpAttrs(pagination)... }
 		}
 	>
 		<img
@@ -65,10 +65,10 @@ templ MessageLeft(roomID int, message services.Message, paginateUp bool, nextPag
 	</div>
 }
 
-func PaginateUpAttrs(roomId, nextPage int) templ.Attributes {
+func PaginateUpAttrs(pagination Pagination) templ.Attributes {
 	return templ.Attributes{
-		"hx-get":     fmt.Sprintf("/rooms/%d/messages?page=%d", roomId, nextPage),
-		"hx-trigger": fmt.Sprintf("intersect threshold:0.1 once root:#room-%d-messages delay:100ms", roomId),
+		"hx-get":     fmt.Sprintf("/rooms/%d/messages?page=%d", pagination.RoomID, pagination.nextPage),
+		"hx-trigger": fmt.Sprintf("intersect threshold:0.1 once root:#room-%d-messages delay:100ms", pagination.RoomID),
 		"hx-swap":    "beforebegin",
 	}
 }
