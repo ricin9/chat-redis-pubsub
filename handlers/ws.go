@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"ricin9/fiber-chat/services"
 
@@ -66,7 +65,7 @@ func handleSubscriptions(client *WsClient, done <-chan struct{}) {
 			var psmsg PSBase
 			err := json.Unmarshal([]byte(msg.Payload), &psmsg)
 			if err != nil {
-				fmt.Println("error unmarshalling pubsub message", err)
+				log.Println(err)
 				continue
 			}
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
+	"log"
 	"ricin9/fiber-chat/config"
 	"slices"
 	"strconv"
@@ -103,7 +103,7 @@ func PersistPublishMessage(ctx context.Context, uid int, msg WsIncomingMessage) 
 
 	payload, err := json.Marshal(outgoing)
 	if err != nil {
-		fmt.Println("error marshalling message", err)
+		log.Println(err)
 		return err
 	}
 

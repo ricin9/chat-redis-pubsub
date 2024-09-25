@@ -215,3 +215,43 @@ function handleRoomClick(room) {
   resetUnread(roomId)
   closeSidebar()
 }
+
+function getRoomId() {
+  const currentRoomId = location.pathname.split('/').pop()
+  if (
+    currentRoomId &&
+    !Number.isNaN(Number(currentRoomId)) &&
+    location.pathname.startsWith('/rooms')
+  ) {
+    return currentRoomId
+  }
+
+  console.log(
+    'not getting room id',
+    currentRoomId,
+    Number.isNaN(Number(currentRoomId)),
+    location.pathname
+  )
+  return null
+}
+
+htmx.onLoad(function (content) {
+  const elem = content.querySelector('#add-member-input')
+  if (!elem) return
+  new TomSelect(elem, {
+    valueField: 'id',
+    labelField: 'username',
+    searchField: 'username',
+    // fetch remote data
+    load: function (query, callback) {
+      fetch(`/rooms/${getRoomId()}/non-members?q=${encodeURIComponent(query)}`)
+        .then((response) => response.json())
+        .then((json) => {
+          callback(json)
+        })
+        .catch(() => {
+          callback()
+        })
+    },
+  })
+})

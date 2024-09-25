@@ -17,6 +17,9 @@ templ Main(title string, rooms []services.Room, page templ.Component) {
 			<script src="/vendor/htmx-ws@2.0.1.js"></script>
 			<script src="/js/main.js" defer></script>
 			<link rel="stylesheet" href="/css/output.css"/>
+			// tom select
+			<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet"/>
+			<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 			@partials.Favicons()
 		</head>
 		<body class="bg-gray-100" hx-ext="ws" ws-connect="/ws">

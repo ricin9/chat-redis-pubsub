@@ -32,6 +32,7 @@ func Setup(app *fiber.App) {
 	app.Post("/rooms/:roomId/members/:userId/kick", middleware.Authenticate, KickMember)
 	app.Post("/rooms/:roomId/members/:userId/promote", middleware.Authenticate, PromoteMember)
 	app.Post("/rooms/:roomId/members/:userId/demote", middleware.Authenticate, DemoteMember)
+	app.Get("/rooms/:roomId/non-members", middleware.Authenticate, FindNonMembers)
 
 	// websockets
 	app.Use("/ws", middleware.Authenticate, func(c *fiber.Ctx) error {

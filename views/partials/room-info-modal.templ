@@ -32,7 +32,7 @@ templ RoomInfoModal(room services.Room, members []services.Member, currentIsAdmi
 				<div class="flex justify-end">
 					<button
 						id="closeRoomInfo"
-						hx-on:click="closeRoomInfo()"
+						onclick="closeRoomInfo()"
 						class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 					>
 						Close
@@ -111,25 +111,23 @@ func displayName(ctx context.Context, member services.Member) (display string) {
 }
 
 type AddMemberFormData struct {
-	Username string
-	Message  string
-	Error    string
+	Message string
+	Error   string
 }
 
 templ AddMemberForm(room services.Room, formData AddMemberFormData) {
-	<form hx-post={ fmt.Sprintf("/rooms/%d/members", room.ID) }>
-		<p id="message" class="text-yellow-500 text-sm mt-1">{ formData.Message }</p>
-		<div class="flex space-x-2">
-			<input
-				id="name"
-				type="text"
-				name="username"
+	<form hx-post={ fmt.Sprintf("/rooms/%d/members", room.ID) } hx-swap="outerHTML">
+		<p id="message" class="text-green-500 text-sm my-1 ">{ formData.Message }</p>
+		<div class="flex gap-2">
+			<select
+				id="add-member-input"
+				name="users"
 				required
-				value={ formData.Username }
+				multiple
 				placeholder="My wonderful room"
-				oninput="this.parentElement.nextElementSibling.textContent = ''"
-				class="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-			/>
+				autocomplete="off"
+				class="flex-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+			></select>
 			<button
 				type="submit"
 				class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-150 ease-in-out"
@@ -141,12 +139,13 @@ templ AddMemberForm(room services.Room, formData AddMemberFormData) {
 	</form>
 }
 
-templ AddMemberSuccessOOB(room services.Room, member services.Member) {
+templ AddMemberSuccessOOB(room services.Room, members []services.Member) {
 	@AddMemberForm(room, AddMemberFormData{
-		Username: "",
-		Message:  "Member added successfully",
+		Message: "Member added successfully",
 	})
 	<ul hx-swap-oob="beforeend:#member-list">
-		@Member(room, member, true)
+		for _, member := range members {
+			@Member(room, member, true)
+		}
 	</ul>
 }
