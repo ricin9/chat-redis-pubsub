@@ -1,26 +1,31 @@
 package main
 
 import (
-	"context"
+	"embed"
+	"net/http"
 	"ricin9/fiber-chat/config"
 	"ricin9/fiber-chat/handlers"
+	"ricin9/fiber-chat/utils"
 
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
-var ctx = context.Background()
+var (
+	//go:embed static
+	embedStaticDir embed.FS
+
+	//go:embed migrations/*
+	embedMigrationsDir embed.FS
+)
 
 func main() {
 	config.Setup()
-
-	// run migrations, dont know where to put this yet
-	// migrations := &migrate.FileMigrationSource{
-	// 	Dir: "migrations",
-	// }
+	utils.Migrate(embedMigrationsDir)
 
 	// Create fiber app
 	app := fiber.New(fiber.Config{
@@ -34,6 +39,11 @@ func main() {
 	// Routes
 	handlers.Setup(app)
 
-	// Listen on port 3000
-	log.Fatal(app.Listen(config.Port)) // go run app.go -port=:3000
+	app.Use("/", filesystem.New(filesystem.Config{
+		Root:       http.FS(embedStaticDir),
+		PathPrefix: "/static",
+	}))
+
+	// Listen on port $PORT or 3000
+	log.Fatal(app.Listen(config.Port))
 }

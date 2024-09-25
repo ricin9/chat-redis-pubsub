@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"net/http"
 	"ricin9/fiber-chat/middleware"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/filesystem"
 )
 
 func Setup(app *fiber.App) {
@@ -46,8 +44,4 @@ func Setup(app *fiber.App) {
 	})
 
 	app.Get("/ws", websocket.New(Websocket))
-
-	app.Use("/", filesystem.New(filesystem.Config{
-		Root: http.Dir("static"),
-	}))
 }

@@ -7,7 +7,10 @@ require (
 	github.com/gofiber/contrib/websocket v1.3.2
 	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/redis/go-redis/v9 v9.6.1
+	github.com/rubenv/sql-migrate v1.7.0
 )
+
+require github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect

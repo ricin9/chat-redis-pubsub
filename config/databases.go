@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 	"log"
+	"os"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -19,8 +20,9 @@ func SetupDatabasesConfig() {
 }
 
 func SetupSqlite() {
-	if *Prod {
-		SqliteSrc = "prod.db"
+	dbpath := os.Getenv("DATABASE_PATH")
+	if len(dbpath) != 0 {
+		SqliteSrc = dbpath
 	} else {
 		SqliteSrc = "test.db"
 	}
@@ -34,7 +36,21 @@ func SetupSqlite() {
 }
 
 func SetupRedis() {
-	RedisClient = redis.NewClient(&redis.Options{
-		Addr: ":6379",
-	})
+	var opts *redis.Options
+
+	rediscConnStr := os.Getenv("REDIS_CONN_STRING")
+	if len(rediscConnStr) != 0 {
+		parsed, err := redis.ParseURL(rediscConnStr)
+		if err != nil {
+			log.Fatalln("REDIS_CONN_STRING Redis connection string is invalid")
+		}
+
+		opts = parsed
+	} else {
+		opts = &redis.Options{
+			Addr: ":6379",
+		}
+	}
+
+	RedisClient = redis.NewClient(opts)
 }
