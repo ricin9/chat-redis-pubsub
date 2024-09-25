@@ -3,10 +3,10 @@ package partials
 
 import "ricin9/fiber-chat/services"
 
-templ MessagesRange(room services.Room, messages []services.Message, nextPage int) {
+templ MessagesRange(room services.Room, messages []services.Message, cursor int) {
 	for idx, message := range messages {
 		if idx == 0 {
-			@Message(message, Pagination{room.ID, nextPage})
+			@Message(message, Pagination{room.ID, cursor})
 		} else {
 			@Message(message, Pagination{})
 		}

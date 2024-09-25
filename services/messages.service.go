@@ -34,10 +34,15 @@ type Message struct {
 	Username  string
 }
 
-func GetMessages(ctx context.Context, uid int, roomID int, page int) (messages []Message, err error) {
+func GetMessages(ctx context.Context, uid int, roomID int, cursor int) (messages []Message, err error) {
 	db := config.Db
 
-	rows, err := db.QueryContext(ctx, "SELECT m.message_id, m.content, m.created_at, ifnull(u.user_id, 0), ifnull(u.username, '') FROM messages m LEFT JOIN users u ON m.user_id = u.user_id WHERE m.room_id = ? ORDER BY m.message_id DESC limit 50 offset ?", roomID, (page-1)*50)
+	rows, err := db.QueryContext(ctx,
+		`SELECT m.message_id, m.content, m.created_at, ifnull(u.user_id, 0), ifnull(u.username, '') FROM messages
+		 m LEFT JOIN users u ON m.user_id = u.user_id 
+		 WHERE m.room_id = ? and m.message_id < ?
+		 ORDER BY m.message_id DESC 
+		 limit 50`, roomID, cursor)
 
 	if err != nil {
 		return nil, err

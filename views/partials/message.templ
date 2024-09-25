@@ -6,8 +6,8 @@ import (
 )
 
 type Pagination struct {
-	RoomID   int
-	nextPage int
+	RoomID int
+	Cursor int
 }
 
 templ Message(message services.Message, pagination Pagination) {

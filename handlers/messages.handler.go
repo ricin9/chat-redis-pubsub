@@ -16,7 +16,7 @@ func GetMessages(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	page := c.QueryInt("page", 1)
+	cursor := c.QueryInt("cursor", 999999999999999999)
 
 	db := config.Db
 
@@ -26,7 +26,7 @@ func GetMessages(c *fiber.Ctx) error {
 		return c.Format("you are not a member of this room")
 	}
 
-	messages, err := services.GetMessages(c.Context(), uid, roomID, page)
+	messages, err := services.GetMessages(c.Context(), uid, roomID, cursor)
 	if err != nil {
 		return c.Format("Error getting messages")
 	}
@@ -35,7 +35,8 @@ func GetMessages(c *fiber.Ctx) error {
 		return c.SendString("")
 	}
 
-	nextpage := page + 1
-	templHandler := templ.Handler(partials.MessagesRange(services.Room{ID: roomID}, messages, nextpage))
+	newCursor := messages[0].ID
+
+	templHandler := templ.Handler(partials.MessagesRange(services.Room{ID: roomID}, messages, newCursor))
 	return adaptor.HTTPHandler(templHandler)(c)
 }

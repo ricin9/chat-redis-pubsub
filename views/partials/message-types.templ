@@ -15,9 +15,9 @@ templ MessageRight(message services.Message, pagination Pagination) {
 		<div>
 			<p class="font-medium text-right">You</p>
 			<p class="bg-blue-600 text-white p-2 rounded-lg shadow">{ message.Content }</p>
-			<div class="mt-1 flex items-center space-x-2 justify-end">
-				<button class="text-sm text-blue-500 hover:underline">Reply</button>
-			</div>
+			// <div class="mt-1 flex items-center space-x-2 justify-end">
+			// 	<button class="text-sm text-blue-500 hover:underline">Reply</button>
+			// </div>
 		</div>
 		<img
 			src={ fmt.Sprintf("https://ui-avatars.com/api/?rounded=true&background=random&name=%s", message.Username) }
@@ -58,16 +58,16 @@ templ MessageLeft(message services.Message, pagination Pagination) {
 		<div>
 			<p class="font-medium">{ message.Username }</p>
 			<p class="bg-white p-2 rounded-lg shadow">{ message.Content }</p>
-			<div class="mt-1 flex items-center space-x-2">
-				<button class="text-sm text-blue-500 hover:underline">Reply</button>
-			</div>
+			// <div class="mt-1 flex items-center space-x-2">
+			// 	<button class="text-sm text-blue-500 hover:underline">Reply</button>
+			// </div>
 		</div>
 	</div>
 }
 
 func PaginateUpAttrs(pagination Pagination) templ.Attributes {
 	return templ.Attributes{
-		"hx-get":     fmt.Sprintf("/rooms/%d/messages?page=%d", pagination.RoomID, pagination.nextPage),
+		"hx-get":     fmt.Sprintf("/rooms/%d/messages?cursor=%d", pagination.RoomID, pagination.Cursor),
 		"hx-trigger": fmt.Sprintf("intersect threshold:0.1 once root:#room-%d-messages delay:100ms", pagination.RoomID),
 		"hx-swap":    "beforebegin",
 	}

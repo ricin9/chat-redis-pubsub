@@ -39,7 +39,7 @@ func GetRoom(c *fiber.Ctx) error {
 		return c.Format("you are not a member of this room")
 	}
 
-	messages, err := services.GetMessages(c.Context(), uid, roomID, 1)
+	messages, err := services.GetMessages(c.Context(), uid, roomID, 999999999999999999)
 	if err != nil {
 		log.Println("[GET / Rooms/:id] getMessages err: ", err)
 		return c.Format("Error getting messages")

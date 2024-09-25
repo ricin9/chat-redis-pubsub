@@ -53,7 +53,7 @@ templ RoomContent(room services.Room, messages []services.Message) {
 		</div>
 	</header>
 	<!-- Chat Area -->
-	@partials.Messages(room, messages, 2)
+	@partials.Messages(room, messages, messages[0].ID)
 	<!-- Message Input -->
 	@partials.MessageInput(room)
 }

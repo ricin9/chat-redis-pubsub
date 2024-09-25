@@ -196,7 +196,7 @@ function toggleRoomMemberActionDropdown(elem) {
 }
 
 function handleMessagesScroll(elem) {
-  if (this.scrollHeight - this.scrollTop === this.clientHeight) {
+  if (elem.scrollHeight - elem.scrollTop === elem.clientHeight) {
     const roomID = location.pathname.split('/').pop()
     resetUnread(roomID)
   }

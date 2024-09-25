@@ -14,8 +14,8 @@ import (
 )
 
 type Pagination struct {
-	RoomID   int
-	nextPage int
+	RoomID int
+	Cursor int
 }
 
 func Message(message services.Message, pagination Pagination) templ.Component {
