@@ -1,6 +1,0 @@
-<li class=\"mb-2\" id=\"
-\" class=\"transition ease-in-out\"><a class=\"p-2 rounded hover:bg-gray-100 transition duration-150 ease-in-out flex justify-between items-center\" href=\"
-\" hx-get=\"
-\" hx-target=\"#room-content\" hx-swap=\"
-\" hx-push-url=\"true\" onclick=\"handleRoomClick(this.parentElement);\"><span># 
-</span> <span class=\"empty:hidden bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full transition duration-150 ease-in-out\"></span></a></li>

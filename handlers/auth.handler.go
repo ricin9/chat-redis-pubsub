@@ -29,9 +29,7 @@ func SignUpView(c *fiber.Ctx) error {
 }
 
 func LoginView(c *fiber.Ctx) error {
-	log.Println("====sup 1")
 	templHandler := templ.Handler(layouts.AuthLayout("Login - Chat App", pages.Login()))
-	log.Println("====sup 2")
 	return adaptor.HTTPHandler(templHandler)(c)
 }
 

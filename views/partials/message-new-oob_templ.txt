@@ -1,4 +1,0 @@
-<div id=\"
-\" data-room-id=\"
-\" hx-swap-oob=\"beforeend\">
-</div>

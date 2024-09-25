@@ -12,3 +12,7 @@ node_modules
 .env.dev
 .env.production
 .env.local.production
+
+# templ generated files
+*templ.go
+*templ.txt
