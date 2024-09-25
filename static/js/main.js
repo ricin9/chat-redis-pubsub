@@ -253,5 +253,10 @@ htmx.onLoad(function (content) {
           callback()
         })
     },
+    plugins: {
+      remove_button: {
+        title: 'Remove this member',
+      },
+    },
   })
 })
