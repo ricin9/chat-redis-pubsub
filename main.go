@@ -35,5 +35,5 @@ func main() {
 	handlers.Setup(app)
 
 	// Listen on port 3000
-	log.Fatal(app.Listen(*config.Port)) // go run app.go -port=:3000
+	log.Fatal(app.Listen(config.Port)) // go run app.go -port=:3000
 }

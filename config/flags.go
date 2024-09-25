@@ -1,8 +1,20 @@
 package config
 
-import "flag"
+import (
+	"flag"
+	"os"
+)
 
 var (
-	Port = flag.String("port", ":3000", "Port to listen on")
+	Port string
 	Prod = flag.Bool("prod", false, "Production mode")
 )
+
+func init() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		Port = ":3000"
+	} else {
+		Port = ":" + port
+	}
+}
