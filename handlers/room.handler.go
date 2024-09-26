@@ -229,3 +229,18 @@ func LeaveRoom(c *fiber.Ctx) error {
 	templHandler := templ.Handler(partials.LeaveRoomOOB(roomID))
 	return adaptor.HTTPHandler(templHandler)(c)
 }
+
+func MarkAsRead(c *fiber.Ctx) error {
+	uid := c.Locals("uid").(int)
+	roomID, err := c.ParamsInt("roomId")
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	err = services.UpdateLastRead(roomID, uid)
+	if err != nil {
+		log.Println(err)
+	}
+
+	return c.SendStatus(fiber.StatusOK)
+}

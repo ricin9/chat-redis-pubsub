@@ -12,6 +12,7 @@ type Room struct {
 	ID          int
 	Name        string
 	LastMessage sql.NullTime
+	UnreadMsgs  int
 }
 
 type Member struct {
@@ -24,9 +25,11 @@ func GetRoomsFor(uid int) (rooms []Room, err error) {
 	db := config.Db
 
 	rows, err := db.Query(`
-	SELECT r.room_id, r.name, (select created_at from messages where room_id = r.room_id order by message_id desc limit 1) as last_message
+	SELECT r.room_id, r.name, 
+	(select created_at from messages where room_id = r.room_id order by message_id desc limit 1) last_message,
+	(select count(message_id) from messages m where room_id = r.room_id and m.created_at > ru.last_read) unread_msgs
 	FROM rooms r
-	JOIN room_users using (room_id)
+	JOIN room_users ru using (room_id)
 	WHERE user_id = ?
 	ORDER BY ifnull(last_message, r.created_at) DESC`,
 		uid)
@@ -36,7 +39,7 @@ func GetRoomsFor(uid int) (rooms []Room, err error) {
 
 	for rows.Next() {
 		var room Room
-		err := rows.Scan(&room.ID, &room.Name, &room.LastMessage)
+		err := rows.Scan(&room.ID, &room.Name, &room.LastMessage, &room.UnreadMsgs)
 		if err != nil {
 			return nil, err
 		}
@@ -127,4 +130,18 @@ func RoomHasMessage(roomID int, messageID int) bool {
 	}
 
 	return true
+}
+
+func UpdateLastRead(roomID int, uid int) error {
+	db := config.Db
+
+	_, err := db.Exec(`UPDATE room_users 
+	SET last_read = CURRENT_TIMESTAMP
+	WHERE room_id = ? AND user_id = ?`, roomID, uid)
+	if err != nil {
+		log.Println("UpdateLastRead err: ", err)
+		return err
+	}
+
+	return nil
 }

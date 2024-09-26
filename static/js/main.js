@@ -151,6 +151,7 @@ document.addEventListener('focus', function (event) {
 
   if (messages.scrollHeight - messages.scrollTop === messages.clientHeight) {
     resetUnread(currentRoomId)
+    UpdateLastReadSrv()
   }
 })
 
@@ -199,6 +200,7 @@ function handleMessagesScroll(elem) {
   if (elem.scrollHeight - elem.scrollTop === elem.clientHeight) {
     const roomID = location.pathname.split('/').pop()
     resetUnread(roomID)
+    UpdateLastReadSrv()
   }
 }
 
@@ -260,3 +262,16 @@ htmx.onLoad(function (content) {
     },
   })
 })
+
+function UpdateLastReadSrv() {
+  const roomId = getRoomId()
+  if (!roomId) {
+    return
+  }
+
+  fetch(`/rooms/${roomId}/mark-as-read`, {
+    method: 'POST',
+  }).catch((error) => {
+    console.error('Error:', error)
+  })
+}

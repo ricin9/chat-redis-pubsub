@@ -3,6 +3,7 @@ package partials
 import (
 	"fmt"
 	"ricin9/fiber-chat/services"
+	"strconv"
 )
 
 templ Room(room services.Room) {
@@ -19,7 +20,14 @@ templ Room(room services.Room) {
 			<span># { room.Name }</span>
 			<span
 				class="empty:hidden bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full transition duration-150 ease-in-out"
-			></span>
+			>{ formatUnreadMsgs(room.UnreadMsgs) }</span>
 		</a>
 	</li>
+}
+
+func formatUnreadMsgs(unreadMsgs int) string {
+	if unreadMsgs == 0 {
+		return ""
+	}
+	return strconv.Itoa(unreadMsgs)
 }
