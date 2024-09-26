@@ -35,7 +35,7 @@ func Main(title string, rooms []services.Room, page templ.Component) templ.Compo
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -48,7 +48,7 @@ func Main(title string, rooms []services.Room, page templ.Component) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><script src=\"/vendor/htmx@2.0.2.min.js\"></script><script src=\"/vendor/htmx-ws@2.0.1.js\"></script><script src=\"/js/main.js\" defer></script><link rel=\"stylesheet\" href=\"/css/output.css\"><link href=\"https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css\" rel=\"stylesheet\"><script src=\"https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js\"></script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -56,7 +56,7 @@ func Main(title string, rooms []services.Room, page templ.Component) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 3)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</head><body class=\"bg-gray-100\" hx-ext=\"ws\" ws-connect=\"/ws\"><div class=\"flex h-screen\"><!-- Sidebar --><div id=\"sidebar\" class=\"w-64 bg-white shadow-md fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-20\"><div class=\"p-4 bg-blue-600 flex justify-between items-center\"><h1 class=\"text-white text-xl font-bold\">Chat App <span class=\"text-base text-neutral-100\">(")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,7 +69,7 @@ func Main(title string, rooms []services.Room, page templ.Component) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 4)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(")</span></h1><button id=\"closeSidebar\" class=\"text-white md:hidden\" hx-on:click=\"closeSidebar()\"><svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Room List --><div class=\"p-4 flex flex-col h-[calc(100vh-4rem)]\"><h2 class=\"text-lg font-semibold mb-2\">Rooms</h2><ul id=\"room-list\" class=\"overflow-y-auto flex-grow\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -79,7 +79,7 @@ func Main(title string, rooms []services.Room, page templ.Component) templ.Compo
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 5)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script>\n\t\t\t\t\t\t\tconst roomId = window.location.pathname.split('/').pop()\n       \t\t\t\t\t       document.getElementById('room-' + roomId)?.classList.add('selected-room')\n         \t\t\t\t   </script></ul><div class=\"mt-auto\"><button id=\"createRoomBtn\" class=\"mt-4 w-full bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-150 ease-in-out\">Create New Room</button> <button hx-get=\"/logout\" class=\"mt-4 w-full bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-150 ease-in-out\">Logout</button></div></div></div><!-- Main Content --><div id=\"room-content\" class=\"flex-1 flex flex-col content-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -87,7 +87,7 @@ func Main(title string, rooms []services.Room, page templ.Component) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 6)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><!-- Create Room Modal --><div id=\"createRoomModal\" class=\"fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center\"><div class=\"bg-white p-8 rounded-lg shadow-xl w-full max-w-md\"><h2 class=\"text-2xl font-bold mb-4\">Create New Room</h2>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -95,7 +95,7 @@ func Main(title string, rooms []services.Room, page templ.Component) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 7)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><!-- Room info modal --><div id=\"room-info-modal\" class=\"hidden\"></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
