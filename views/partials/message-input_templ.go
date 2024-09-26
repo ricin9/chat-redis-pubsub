@@ -38,7 +38,7 @@ func MessageInput(room services.Room) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-white p-4 border-t\" id=\"message-input\"><form class=\"flex space-x-2\" ws-send hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -51,7 +51,7 @@ func MessageInput(room services.Room) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"flex flex-row gap-2\" hx-on::ws-after-send=\"this.reset();\"><input type=\"text\" name=\"Content\" required minlength=\"1\" placeholder=\"Type your message...\" class=\"flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600\"> <button type=\"submit\" class=\"bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-150 ease-in-out\">Send</button></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
