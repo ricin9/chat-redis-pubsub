@@ -1,0 +1,37 @@
+package partials
+
+import (
+	"fmt"
+	"ricin9/fiber-chat/services"
+	"time"
+)
+
+templ AvatarLeft(message services.Message) {
+	<div class="relative">
+		<img
+			src={ fmt.Sprintf("https://ui-avatars.com/api/?rounded=true&background=random&name=%s", message.Username) }
+			alt={ fmt.Sprintf("%s Avatar", message.Username) }
+			class="w-10 h-10 rounded-full"
+		/>
+		@statusBadgeLeft(message.UserLastOnline)
+	</div>
+}
+
+templ AvatarRight(message services.Message) {
+	<div class="relative">
+		<img
+			src={ fmt.Sprintf("https://ui-avatars.com/api/?rounded=true&background=random&name=%s", message.Username) }
+			alt={ fmt.Sprintf("%s Avatar", message.Username) }
+			class="w-10 h-10 rounded-full"
+		/>
+		<span class="top-0 right-7 absolute  w-3.5 h-3.5 bg-green-400 border-2 border-white  rounded-full"></span>
+	</div>
+}
+
+templ statusBadgeLeft(lastOnline time.Time) {
+	if time.Now().Sub(lastOnline) < 6*time.Minute {
+		<span class="top-0 left-7 absolute  w-3.5 h-3.5 bg-green-400 border-2 border-white  rounded-full"></span>
+	} else {
+		<span class="top-0 left-7 absolute  w-3.5 h-3.5 bg-gray-400 border-2 border-white  rounded-full"></span>
+	}
+}

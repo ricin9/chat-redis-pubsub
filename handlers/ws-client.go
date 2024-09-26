@@ -9,6 +9,7 @@ import (
 	"ricin9/fiber-chat/views/partials"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/redis/go-redis/v9"
@@ -32,6 +33,24 @@ func (c *WsClient) Init() {
 	userNotifCh := fmt.Sprintf("user:%d", c.Uid)
 	chans := append(rooms, userNotifCh)
 	c.pubsub = config.RedisClient.Subscribe(context.Background(), chans...)
+
+	go c.UpdateLastOnline()
+}
+
+func (c *WsClient) UpdateLastOnline() {
+	// probably need to to listen to a context or chan to exit immediately when ws conn is closed
+	for {
+		if c.WsConn == nil {
+			break
+		}
+
+		_, err := config.Db.Exec("UPDATE users SET last_online = CURRENT_TIMESTAMP WHERE user_id = ?", c.Uid)
+
+		if err != nil {
+			log.Println("[UpdateLastOnline] Error updating last_online", err)
+		}
+		<-time.After(5 * time.Minute)
+	}
 }
 
 func (c *WsClient) Write(p []byte) (int, error) {
@@ -78,11 +97,12 @@ func (c *WsClient) LeaveRoom(data PSLeaveRoom) error {
 func (c *WsClient) SendMessage(payload PSMessageBroadcast) error {
 
 	component := partials.NewMessageOOB(payload.RoomID, services.Message{
-		ID:        payload.ID,
-		UserID:    payload.UserID,
-		Username:  payload.Username,
-		Content:   payload.Content,
-		CreatedAt: payload.CreatedAt,
+		ID:             payload.ID,
+		UserID:         payload.UserID,
+		Username:       payload.Username,
+		Content:        payload.Content,
+		CreatedAt:      payload.CreatedAt,
+		UserLastOnline: time.Now(),
 	})
 
 	if err := component.Render(context.WithValue(context.Background(), "uid", c.Uid), c); err != nil {

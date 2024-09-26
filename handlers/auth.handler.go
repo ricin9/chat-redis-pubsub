@@ -9,6 +9,7 @@ import (
 	"ricin9/fiber-chat/views/layouts"
 	"ricin9/fiber-chat/views/pages"
 	"ricin9/fiber-chat/views/partials"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
@@ -56,7 +57,7 @@ func Signup(c *fiber.Ctx) error {
 
 	db := config.Db
 
-	res, err := db.Exec("INSERT INTO users (username, password) VALUES (?, ?)", user.Username, hash)
+	res, err := db.Exec("INSERT INTO users (username, password, last_online) VALUES (?, ?, ?)", user.Username, hash, time.Now())
 	if err != nil {
 		if e, ok := err.(sqlite3.Error); ok && e.Code == sqlite3.ErrConstraint {
 			return c.Format("Username already exists")

@@ -34,7 +34,7 @@ func MessageRight(message services.Message, pagination Pagination) templ.Compone
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex items-start space-x-2 justify-end mt-4\"")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -44,7 +44,7 @@ func MessageRight(message services.Message, pagination Pagination) templ.Compone
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("><div><p class=\"font-medium text-right\">You</p><p class=\"bg-blue-600 text-white p-2 rounded-lg shadow\">")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -57,33 +57,15 @@ func MessageRight(message services.Message, pagination Pagination) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><img src=\"")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 3)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("https://ui-avatars.com/api/?rounded=true&background=random&name=%s", message.Username))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 23, Col: 108}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		templ_7745c5c3_Err = AvatarRight(message).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s Avatar", message.Username))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 24, Col: 51}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-10 h-10 rounded-full\"></div>")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 4)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -107,12 +89,12 @@ func MessageMiddle(message services.Message, pagination Pagination) templ.Compon
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex items-start justify-center space-x-2 mt-4\" class=\"flex items-start space-x-2 justify-end mt-4\"")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 5)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -122,20 +104,20 @@ func MessageMiddle(message services.Message, pagination Pagination) templ.Compon
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("><div><p class=\"bg-white p-2 rounded-lg shadow\">")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 6)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(message.Content)
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(message.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 39, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 35, Col: 62}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></div>")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 7)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -159,12 +141,12 @@ func MessageLeft(message services.Message, pagination Pagination) templ.Componen
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex items-start space-x-2 mt-4\" class=\"flex items-start justify-center space-x-2 mt-4\" class=\"flex items-start space-x-2 justify-end mt-4\"")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 8)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -174,59 +156,41 @@ func MessageLeft(message services.Message, pagination Pagination) templ.Componen
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("><img src=\"")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 9)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("https://ui-avatars.com/api/?rounded=true&background=random&name=%s", message.Username))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 54, Col: 108}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		templ_7745c5c3_Err = AvatarLeft(message).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 10)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s Avatar", message.Username))
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(message.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 55, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 51, Col: 44}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-10 h-10 rounded-full\"><div><p class=\"font-medium\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(message.Username)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 59, Col: 44}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 11)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"bg-white p-2 rounded-lg shadow\">")
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(message.Content)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 52, Col: 62}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(message.Content)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/message-types.templ`, Line: 60, Col: 62}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></div>")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 12)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

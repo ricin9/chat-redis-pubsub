@@ -19,11 +19,7 @@ templ MessageRight(message services.Message, pagination Pagination) {
 			// 	<button class="text-sm text-blue-500 hover:underline">Reply</button>
 			// </div>
 		</div>
-		<img
-			src={ fmt.Sprintf("https://ui-avatars.com/api/?rounded=true&background=random&name=%s", message.Username) }
-			alt={ fmt.Sprintf("%s Avatar", message.Username) }
-			class="w-10 h-10 rounded-full"
-		/>
+		@AvatarRight(message)
 	</div>
 }
 
@@ -50,11 +46,7 @@ templ MessageLeft(message services.Message, pagination Pagination) {
 			{ PaginateUpAttrs(pagination)... }
 		}
 	>
-		<img
-			src={ fmt.Sprintf("https://ui-avatars.com/api/?rounded=true&background=random&name=%s", message.Username) }
-			alt={ fmt.Sprintf("%s Avatar", message.Username) }
-			class="w-10 h-10 rounded-full"
-		/>
+		@AvatarLeft(message)
 		<div>
 			<p class="font-medium">{ message.Username }</p>
 			<p class="bg-white p-2 rounded-lg shadow">{ message.Content }</p>
